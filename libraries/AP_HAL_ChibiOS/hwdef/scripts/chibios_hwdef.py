@@ -411,14 +411,9 @@ class ChibiOSHWDef(object):
                 self.type.startswith('UART')) and (
                 (self.label.endswith('_TX') or
                  self.label.endswith('_RX') or
-                 self.label.endswith('_CTS'))):
+                 self.label.endswith('_CTS') or
+                 self.label.endswith('_RTS'))):
                 v = "PULLUP"
-
-            # pulldown on RTS to prevent radios from staying in bootloader
-            if (self.type.startswith('USART') or
-                self.type.startswith('UART')) and (
-                 self.label.endswith('_RTS')):
-                v = "PULLDOWN"
 
             if (self.type.startswith('SWD') and
                     'SWDIO' in self.label):
@@ -965,19 +960,18 @@ class ChibiOSHWDef(object):
             f.write('#define STM32_USB_USE_OTG2                  TRUE\n')
 
         if 'ETH1' in self.bytype:
+            f.write('// Configure for Ethernet support\n')
+            f.write('#define CH_CFG_USE_MAILBOXES                TRUE\n')
+            f.write('#define HAL_USE_MAC                         TRUE\n')
+            f.write('#define MAC_USE_EVENTS                      TRUE\n')
+            f.write('#define STM32_ETH_BUFFERS_EXTERN\n')
+            f.write('#define AP_NETWORKING_ENABLED               TRUE\n')
             self.build_flags.append('USE_LWIP=yes')
-            f.write('''
-
-#ifndef AP_NETWORKING_ENABLED
-// Configure for Ethernet support
-#define AP_NETWORKING_ENABLED               1
-#define CH_CFG_USE_MAILBOXES                TRUE
-#define HAL_USE_MAC                         TRUE
-#define MAC_USE_EVENTS                      TRUE
-#define STM32_ETH_BUFFERS_EXTERN
-#endif
-
-''')
+            self.env_vars['WITH_NETWORKING'] = True
+        else:
+            f.write('#define AP_NETWORKING_ENABLED               FALSE\n')
+            self.build_flags.append('USE_LWIP=no')
+            self.env_vars['WITH_NETWORKING'] = False
 
         defines = self.get_mcu_config('DEFINES', False)
         if defines is not None:
@@ -1524,9 +1518,7 @@ INCLUDE common.ld
             if t.startswith('SPI'):
                 self.spi_list.append(t)
         self.spi_list = sorted(self.spi_list)
-        if len(self.spidev) != 0 and len(self.spi_list) == 0:
-            self.error("Have SPI devices but no SPI bus?!")
-        if len(self.spidev) == 0:
+        if len(self.spi_list) == 0:
             f.write('#define HAL_USE_SPI FALSE\n')
             return
         devlist = []

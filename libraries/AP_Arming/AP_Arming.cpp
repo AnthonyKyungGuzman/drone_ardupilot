@@ -183,9 +183,7 @@ void AP_Arming::update(void)
     const uint32_t now_ms = AP_HAL::millis();
     // perform pre-arm checks & display failures every 30 seconds
     bool display_fail = false;
-    if ((report_immediately && (now_ms - last_prearm_display_ms > 4000)) ||
-        (now_ms - last_prearm_display_ms > PREARM_DISPLAY_PERIOD*1000)) {
-        report_immediately = false;
+    if (now_ms - last_prearm_display_ms > PREARM_DISPLAY_PERIOD*1000) {
         display_fail = true;
         last_prearm_display_ms = now_ms;
     }
@@ -1542,7 +1540,7 @@ bool AP_Arming::pre_arm_checks(bool report)
     }
 #endif
 
-    bool checks_result = hardware_safety_check(report)
+    return hardware_safety_check(report)
 #if HAL_HAVE_IMU_HEATER
         &  heater_min_temperature_checks(report)
 #endif
@@ -1577,13 +1575,6 @@ bool AP_Arming::pre_arm_checks(bool report)
         &  opendroneid_checks(report)
         &  serial_protocol_checks(report)
         &  estop_checks(report);
-
-    if (!checks_result && last_prearm_checks_result) { // check went from true to false
-        report_immediately = true;
-    }
-    last_prearm_checks_result = checks_result;
-
-    return checks_result;
 }
 
 bool AP_Arming::arm_checks(AP_Arming::Method method)
@@ -1690,9 +1681,7 @@ bool AP_Arming::arm(AP_Arming::Method method, const bool do_arming_checks)
         }
     }
 #endif
-#if defined(HAL_ARM_GPIO_PIN)
-    update_arm_gpio();
-#endif
+
     return armed;
 }
 
@@ -1732,20 +1721,9 @@ bool AP_Arming::disarm(const AP_Arming::Method method, bool do_disarm_checks)
         }
     }
 #endif
-#if defined(HAL_ARM_GPIO_PIN)
-    update_arm_gpio();
-#endif
+
     return true;
 }
-
-#if defined(HAL_ARM_GPIO_PIN)
-void AP_Arming::update_arm_gpio()
-{
-    if (!AP_BoardConfig::arming_gpio_disabled()) {
-        hal.gpio->write(HAL_ARM_GPIO_PIN, HAL_ARM_GPIO_POL_INVERT ? !armed : armed);
-    }
-}
-#endif
 
 void AP_Arming::send_arm_disarm_statustext(const char *str) const
 {

@@ -185,7 +185,7 @@
 #endif
 
 #ifndef HAL_GYROFFT_ENABLED
-#define HAL_GYROFFT_ENABLED (BOARD_FLASH_SIZE > 1024)
+#define HAL_GYROFFT_ENABLED (BOARD_FLASH_SIZE > 1024) //AKGL
 #endif
 
 // enable AP_GyroFFT library only if required:

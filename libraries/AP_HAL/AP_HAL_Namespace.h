@@ -67,7 +67,6 @@ namespace AP_HAL {
 
     class SIMState;
 
-    // Must be implemented by the concrete HALs and return the same reference.
+    // Must be implemented by the concrete HALs.
     const HAL& get_HAL();
-    HAL& get_HAL_mutable();
 }

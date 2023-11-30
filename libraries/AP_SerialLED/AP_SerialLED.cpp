@@ -62,21 +62,20 @@ bool AP_SerialLED::set_num_profiled(uint8_t chan, uint8_t num_leds)
 }
 
 // set RGB value on LED number. LED number -1 is all LEDs. First LED is 0. chan is PWM output, 1..16
-bool AP_SerialLED::set_RGB(uint8_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue)
+void AP_SerialLED::set_RGB(uint8_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue)
 {
     if (chan >= 1 && chan <= 16) {
-        return hal.rcout->set_serial_led_rgb_data(chan-1, led, red, green, blue);
+        hal.rcout->set_serial_led_rgb_data(chan-1, led, red, green, blue);
     }
-    return false;
 }
 
 // trigger sending of LED changes to LEDs
-bool AP_SerialLED::send(uint8_t chan)
+void AP_SerialLED::send(uint8_t chan)
 {
     if (chan >= 1 && chan <= 16) {
-        return hal.rcout->serial_led_send(chan-1);
+        hal.rcout->serial_led_send(chan-1);
     }
-    return false;
+
 }
 
 #endif  // AP_SERIALLED_ENABLED

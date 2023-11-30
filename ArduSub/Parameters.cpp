@@ -47,8 +47,6 @@ const AP_Param::Info Sub::var_info[] = {
     // @Param: SYSID_MYGCS
     // @DisplayName: My ground station number
     // @Description: Allows restricting radio overrides to only come from my ground station
-    // @Range: 1 255
-    // @Increment: 1
     // @User: Advanced
     GSCALAR(sysid_my_gcs,   "SYSID_MYGCS",     255),
 
@@ -273,7 +271,7 @@ const AP_Param::Info Sub::var_info[] = {
 
     // @Param: JS_THR_GAIN
     // @DisplayName: Throttle gain scalar
-    // @Description: Scalar for gain on the throttle channel. Gets scaled with the current JS gain
+    // @Description: Scalar for gain on the throttle channel
     // @User: Standard
     // @Range: 0.5 4.0
     GSCALAR(throttle_gain, "JS_THR_GAIN", 1.0f),

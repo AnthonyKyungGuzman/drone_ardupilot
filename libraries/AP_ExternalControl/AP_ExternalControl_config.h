@@ -4,7 +4,7 @@
 #include <AP_HAL/AP_HAL_Boards.h>
 
 #ifndef AP_EXTERNAL_CONTROL_ENABLED
-#define AP_EXTERNAL_CONTROL_ENABLED 1
+#define AP_EXTERNAL_CONTROL_ENABLED 0 //1 AKGL
 #endif
 
 

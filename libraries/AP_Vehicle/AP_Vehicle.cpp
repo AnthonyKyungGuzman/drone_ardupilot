@@ -169,6 +169,7 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     // @Bitmask{Copter}: 21:Heli_Autorotate
     // @Bitmask{Copter}: 22:Auto RTL
     // @Bitmask{Copter}: 23:Turtle
+    // @Bitmask{Copter}: 24:Custom
     // @Bitmask{Plane}: 0:Manual
     // @Bitmask{Plane}: 1:Circle
     // @Bitmask{Plane}: 2:Stabilize
@@ -202,7 +203,8 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     // @Bitmask{Rover}: 10:Guided
     // @Bitmask{Rover}: 11:Dock
     // @User: Standard
-    AP_GROUPINFO("FLTMODE_GCSBLOCK", 20, AP_Vehicle, flight_mode_GCS_block, 0),
+    // AP_GROUPINFO("FLTMODE_GCSBLOCK", 20, AP_Vehicle, flight_mode_GCS_block, 0),
+    AP_GROUPINFO("FLTMODE_GCSBLOCK", 24, AP_Vehicle, flight_mode_GCS_block, 0), //AKGL
 #endif // APM_BUILD_COPTER_OR_HELI || APM_BUILD_TYPE(APM_BUILD_ArduPlane) || APM_BUILD_TYPE(APM_BUILD_Rover)
 
 
@@ -210,42 +212,8 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     // @Group: NET_
     // @Path: ../AP_Networking/AP_Networking.cpp
     AP_SUBGROUPINFO(networking, "NET_", 21, AP_Vehicle, AP_Networking),
-
-    /*
-      the NET_Pn_ parameters need to be in AP_Vehicle as otherwise we
-      are too deep in the parameter tree
-     */
-
-#if AP_NETWORKING_NUM_PORTS > 0
-    // @Group: NET_P1_
-    // @Path: ../AP_Networking/AP_Networking_port.cpp
-    AP_SUBGROUPINFO(networking.ports[0], "NET_P1_", 22, AP_Vehicle, AP_Networking::Port),
 #endif
 
-#if AP_NETWORKING_NUM_PORTS > 1
-    // @Group: NET_P2_
-    // @Path: ../AP_Networking/AP_Networking_port.cpp
-    AP_SUBGROUPINFO(networking.ports[1], "NET_P2_", 23, AP_Vehicle, AP_Networking::Port),
-#endif
-
-#if AP_NETWORKING_NUM_PORTS > 2
-    // @Group: NET_P3_
-    // @Path: ../AP_Networking/AP_Networking_port.cpp
-    AP_SUBGROUPINFO(networking.ports[2], "NET_P3_", 24, AP_Vehicle, AP_Networking::Port),
-#endif
-
-#if AP_NETWORKING_NUM_PORTS > 3
-    // @Group: NET_P4_
-    // @Path: ../AP_Networking/AP_Networking_port.cpp
-    AP_SUBGROUPINFO(networking.ports[3], "NET_P4_", 25, AP_Vehicle, AP_Networking::Port),
-#endif
-#endif // AP_NETWORKING_ENABLED
-
-#if AP_FILTER_ENABLED
-    // @Group: FILT
-    // @Path: ../Filter/AP_Filter.cpp
-    AP_SUBGROUPINFO(filters, "FILT", 26, AP_Vehicle, AP_Filters),
-#endif
     AP_GROUPEND
 };
 
@@ -372,7 +340,7 @@ void AP_Vehicle::setup()
 #endif
 #if HAL_VISUALODOM_ENABLED
     // init library used for visual position estimation
-    visual_odom.init();
+    visual_odom.init();                 //TODO_AKGL: See if Visual Odometry init has failchecks if there is no Visual Odometry
 #endif
 
 #if AP_VIDEOTX_ENABLED
@@ -403,7 +371,7 @@ void AP_Vehicle::setup()
 #endif
 
 #if AP_TEMPERATURE_SENSOR_ENABLED
-    temperature_sensor.init();
+    temperature_sensor.init();       //TODO_AKGL: See if Temperature init has failchecks if there is no Temperature
 #endif
 
 #if AP_KDECAN_ENABLED
@@ -411,22 +379,18 @@ void AP_Vehicle::setup()
 #endif
 
 #if AP_AIS_ENABLED
-    ais.init();
+    ais.init();                     //TODO_AKGL: See if AIS init has failchecks if there is no AIS
 #endif
 
 #if HAL_NMEA_OUTPUT_ENABLED
-    nmea.init();
+    nmea.init();                    //TODO_AKGL: See if NMEA init has failchecks if there is no NMEA
 #endif
 
 #if AP_FENCE_ENABLED
-    fence.init();
+    fence.init();                   //TODO_AKGL: See if Fence init has failchecks if there is no Fence
 #endif
 
     custom_rotations.init();
-
-#if AP_FILTER_ENABLED
-    filters.init();
-#endif
 
 #if HAL_WITH_ESC_TELEM && HAL_GYROFFT_ENABLED
     for (uint8_t i = 0; i<ESC_TELEM_MAX_ESCS; i++) {
@@ -503,7 +467,11 @@ SCHED_TASK_CLASS arguments:
  - priority (0 through 255, lower number meaning higher priority)
 
  */
+#define CUSTOM_MODE 1 
+
 const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
+    SCHED_TASK(dummy_common_task,                                                      0.1, 1, 245),
+#if CUSTOM_MODE == 0 
 #if HAL_GYROFFT_ENABLED
     FAST_TASK_CLASS(AP_GyroFFT,    &vehicle.gyro_fft,       sample_gyros),
 #endif
@@ -568,16 +536,19 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
 #if HAL_WITH_ESC_TELEM && HAL_GYROFFT_ENABLED
     SCHED_TASK(check_motor_noise,      5,     50, 252),
 #endif
-#if AP_FILTER_ENABLED
-    SCHED_TASK_CLASS(AP_Filters,   &vehicle.filters,        update,                   1, 100, 252),
-#endif
     SCHED_TASK(update_arming,          1,     50, 253),
+#endif
 };
 
 void AP_Vehicle::get_common_scheduler_tasks(const AP_Scheduler::Task*& tasks, uint8_t& num_tasks)
 {
     tasks = scheduler_tasks;
     num_tasks = ARRAY_SIZE(scheduler_tasks);
+}
+
+void AP_Vehicle::dummy_common_task() //AKGL
+{
+    //Task that does nothing in order to just have a task and not change deeper code
 }
 
 /*

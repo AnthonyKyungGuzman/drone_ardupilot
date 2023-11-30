@@ -234,7 +234,7 @@ bool AP_Logger_File::dirent_to_log_num(const dirent *de, uint16_t &log_num) cons
     }
 
     uint16_t thisnum = strtoul(de->d_name, nullptr, 10);
-    if (thisnum > _front.get_max_num_logs()) {
+    if (thisnum > MAX_LOG_FILES) {
         return false;
     }
     log_num = thisnum;
@@ -330,7 +330,7 @@ void AP_Logger_File::Prep_MinSpace()
         if (avail >= target_free) {
             break;
         }
-        if (count++ > _front.get_max_num_logs() + 10) {
+        if (count++ > MAX_LOG_FILES+10) {
             // *way* too many deletions going on here.  Possible internal error.
             INTERNAL_ERROR(AP_InternalError::error_t::logger_too_many_deletions);
             break;
@@ -360,7 +360,7 @@ void AP_Logger_File::Prep_MinSpace()
             }
         }
         log_to_remove++;
-        if (log_to_remove > _front.get_max_num_logs()) {
+        if (log_to_remove > MAX_LOG_FILES) {
             log_to_remove = 1;
         }
     } while (log_to_remove != first_log_to_remove);
@@ -719,7 +719,6 @@ uint16_t AP_Logger_File::get_num_logs()
             // not a log filename
             continue;
         }
-
         if (thisnum > high && (smallest_above_last == 0 || thisnum < smallest_above_last)) {
             smallest_above_last = thisnum;
         }
@@ -727,7 +726,7 @@ uint16_t AP_Logger_File::get_num_logs()
     AP::FS().closedir(d);
     if (smallest_above_last != 0) {
         // we have wrapped, add in the logs with high numbers
-        ret += (_front.get_max_num_logs() - smallest_above_last) + 1;
+        ret += (MAX_LOG_FILES - smallest_above_last) + 1;
     }
 
     return ret;
@@ -827,7 +826,7 @@ void AP_Logger_File::start_new_log(void)
     if (_get_log_size(log_num) > 0 || log_num == 0) {
         log_num++;
     }
-    if (log_num > _front.get_max_num_logs()) {
+    if (log_num > MAX_LOG_FILES) {
         log_num = 1;
     }
     if (!write_fd_semaphore.take(1)) {
@@ -1116,7 +1115,7 @@ void AP_Logger_File::erase_next(void)
     free(fname);
 
     erase.log_num++;
-    if (erase.log_num <= _front.get_max_num_logs()) {
+    if (erase.log_num <= MAX_LOG_FILES) {
         return;
     }
     

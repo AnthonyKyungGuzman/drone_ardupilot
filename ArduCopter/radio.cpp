@@ -75,55 +75,99 @@ void Copter::init_rc_out()
     BoardConfig.set_default_safety_ignore_mask(safety_ignore_mask);
 #endif
 }
-
-
-void Copter::read_radio()
+void Copter::read_radio() //AKGL
 {
-    const uint32_t tnow_ms = millis();
+    if (rc().read_input()) 
+    {
+        int16_t thrust = channel_throttle->get_radio_in();
+        int16_t motorStateStarting = channel_yaw->get_radio_in(); 
+        int16_t motorStateManual = channel_roll->get_radio_in();       
 
-    if (rc().read_input()) {
-        ap.new_radio_frame = true;
+        if (motorStateManual == channel_roll->get_radio_max())
+        {
+            motors->set_spool_state(MOTOR_CLASS::SpoolState::MANUAL);
+        }
+        else if (motorStateManual == channel_roll->get_radio_min())
+        {
+            motors->set_spool_state(MOTOR_CLASS::SpoolState::SHUT_DOWN);
+        }
 
-        set_throttle_and_failsafe(channel_throttle->get_radio_in());
-        set_throttle_zero_flag(channel_throttle->get_control_in());
+        if (motorStateStarting == channel_yaw->get_radio_max())
+        {   
+            motors->set_spool_state(MOTOR_CLASS::SpoolState::THROTTLE_UNLIMITED);
+        }
+        else if (motorStateStarting == channel_yaw->get_radio_min())
+        {
+            motors->set_spool_state(MOTOR_CLASS::SpoolState::SHUT_DOWN);
+        }
+        
+        if(motors->get_spool_state() == MOTOR_CLASS::SpoolState::MANUAL)
+        {
+            motors->set_motor_output_from_nuc(copter.motorValue);
+        }
 
-        // RC receiver must be attached if we've just got input
-        ap.rc_receiver_present = true;
-
-        // pass pilot input through to motors (used to allow wiggling servos while disarmed on heli, single, coax copters)
-        radio_passthrough_to_motors();
-
-        const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
-        rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
-        last_radio_update_ms = tnow_ms;
-        return;
+        if(motors->get_spool_state() == MOTOR_CLASS::SpoolState::THROTTLE_UNLIMITED)
+        {
+            // max 1900 min 1100
+            if (thrust <= channel_throttle->get_radio_min())
+            {
+                motors->set_thrust(0.0);
+            }
+            else
+            {
+                motors->set_thrust((double)(thrust/channel_throttle->get_radio_max()));
+            }
+        }           
     }
-
-    // No radio input this time
-    if (failsafe.radio) {
-        // already in failsafe!
-        return;
-    }
-
-    // trigger failsafe if no update from the RC Radio for RC_FS_TIMEOUT seconds
-    const uint32_t elapsed_ms = tnow_ms - last_radio_update_ms;
-    if (elapsed_ms < rc().get_fs_timeout_ms()) {
-        // not timed out yet
-        return;
-    }
-    if (!g.failsafe_throttle) {
-        // throttle failsafe not enabled
-        return;
-    }
-    if (!ap.rc_receiver_present && !motors->armed()) {
-        // we only failsafe if we are armed OR we have ever seen an RC receiver
-        return;
-    }
-
-    // Log an error and enter failsafe.
-    AP::logger().Write_Error(LogErrorSubsystem::RADIO, LogErrorCode::RADIO_LATE_FRAME);
-    set_failsafe_radio(true);
 }
+
+// void Copter::read_radio()
+// {
+//     const uint32_t tnow_ms = millis();
+
+//     if (rc().read_input()) {
+//         ap.new_radio_frame = true;
+
+//         set_throttle_and_failsafe(channel_throttle->get_radio_in());
+//         set_throttle_zero_flag(channel_throttle->get_control_in());
+
+//         // RC receiver must be attached if we've just got input
+//         ap.rc_receiver_present = true;
+
+//         // pass pilot input through to motors (used to allow wiggling servos while disarmed on heli, single, coax copters)
+//         radio_passthrough_to_motors();
+
+//         const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
+//         rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
+//         last_radio_update_ms = tnow_ms;
+//         return;
+//     }
+
+//     // No radio input this time
+//     if (failsafe.radio) {
+//         // already in failsafe!
+//         return;
+//     }
+
+//     // trigger failsafe if no update from the RC Radio for RC_FS_TIMEOUT seconds
+//     const uint32_t elapsed_ms = tnow_ms - last_radio_update_ms;
+//     if (elapsed_ms < rc().get_fs_timeout_ms()) {
+//         // not timed out yet
+//         return;
+//     }
+//     if (!g.failsafe_throttle) {
+//         // throttle failsafe not enabled
+//         return;
+//     }
+//     if (!ap.rc_receiver_present && !motors->armed()) {
+//         // we only failsafe if we are armed OR we have ever seen an RC receiver
+//         return;
+//     }
+
+//     // Log an error and enter failsafe.
+//     AP::logger().Write_Error(LogErrorSubsystem::RADIO, LogErrorCode::RADIO_LATE_FRAME);
+//     set_failsafe_radio(true);
+// }
 
 #define FS_COUNTER 3        // radio failsafe kicks in after 3 consecutive throttle values below failsafe_throttle_value
 void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)

@@ -101,7 +101,7 @@ void AP_Periph_FW::init()
     can_start();
 
 #ifdef HAL_PERIPH_ENABLE_NETWORKING
-    networking_periph.init();
+    networking.init();
 #endif
 
 #if HAL_GCS_ENABLED
@@ -502,7 +502,7 @@ void AP_Periph_FW::update()
     can_update();
 
 #ifdef HAL_PERIPH_ENABLE_NETWORKING
-    networking_periph.update();
+    networking.update();
 #endif
 
 #if (defined(HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY) && HAL_PERIPH_NEOPIXEL_COUNT_WITHOUT_NOTIFY == 8) || defined(HAL_PERIPH_ENABLE_NOTIFY)

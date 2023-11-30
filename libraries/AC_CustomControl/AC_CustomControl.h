@@ -7,6 +7,7 @@
 #include <AP_Param/AP_Param.h>
 #include <AP_AHRS/AP_AHRS_View.h>
 #include <AC_AttitudeControl/AC_AttitudeControl_Multi.h>
+#include <AC_AttitudeControl/AC_AttitudeControl_Custom.h>
 #include <AP_Motors/AP_MotorsMulticopter.h>
 #include <AP_Logger/AP_Logger.h>
 
@@ -20,7 +21,8 @@ class AC_CustomControl_Backend;
 
 class AC_CustomControl {
 public:
-    AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl_Multi*& _att_control, AP_MotorsMulticopter*& motors, float dt);
+    // AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl_Multi*& _att_control, AP_MotorsMulticopter*& motors, float dt);
+    AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl_Custom*& _att_control, AP_MotorsMulticopter*& motors, float dt);
 
     CLASS_NO_COPY(AC_CustomControl);  /* Do not allow copies */
 
@@ -31,9 +33,6 @@ public:
     void reset_main_att_controller(void);
     bool is_safe_to_run(void);
     void log_switch(void);
-
-    // set the PID notch sample rates
-    void set_notch_sample_rate(float sample_rate);
 
     // zero index controller type param, only use it to access _backend or _backend_var_info array
     uint8_t get_type() { return _controller_type > 0 ? (_controller_type - 1) : 0; };
@@ -62,7 +61,8 @@ protected:
 
     // References to external libraries
     AP_AHRS_View*& _ahrs;
-    AC_AttitudeControl_Multi*& _att_control;
+    // AC_AttitudeControl_Multi*& _att_control;
+    AC_AttitudeControl_Custom*& _att_control;
     AP_MotorsMulticopter*& _motors;
 
     AP_Enum<CustomControlType> _controller_type;

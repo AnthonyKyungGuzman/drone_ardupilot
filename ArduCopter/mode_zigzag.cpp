@@ -585,15 +585,27 @@ void ModeZigZag::spray(bool b)
 
 uint32_t ModeZigZag::wp_distance() const
 {
-    return is_auto ? wp_nav->get_wp_distance_to_destination() : 0;
+    if (is_auto) {
+        return wp_nav->get_wp_distance_to_destination();
+    } else {
+        return 0;
+    }
 }
 int32_t ModeZigZag::wp_bearing() const
 {
-    return is_auto ? wp_nav->get_wp_bearing_to_destination() : 0;
+    if (is_auto) {
+        return wp_nav->get_wp_bearing_to_destination();
+    } else {
+        return 0;
+    }
 }
 float ModeZigZag::crosstrack_error() const
 {
-    return is_auto ? wp_nav->crosstrack_error() : 0;
+    if (is_auto) {
+        return wp_nav->crosstrack_error();
+    } else {
+        return 0;
+    }
 }
 
 #endif // MODE_ZIGZAG_ENABLED == ENABLED

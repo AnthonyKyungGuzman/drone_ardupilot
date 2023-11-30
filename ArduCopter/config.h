@@ -27,8 +27,6 @@
 /// change in your local copy of APM_Config.h.
 ///
 #include "APM_Config.h"
-#include <AP_ADSB/AP_ADSB_config.h>
-#include <AP_Follow/AP_Follow_config.h>
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -148,8 +146,8 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // Nav-Guided - allows external nav computer to control vehicle
-#ifndef AC_NAV_GUIDED
- # define AC_NAV_GUIDED    ENABLED
+#ifndef NAV_GUIDED
+ # define NAV_GUIDED    !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -191,7 +189,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Follow - follow another vehicle or GCS
 #ifndef MODE_FOLLOW_ENABLED
-# define MODE_FOLLOW_ENABLED AP_FOLLOW_ENABLED
+# define MODE_FOLLOW_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -203,7 +201,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // GuidedNoGPS mode - control vehicle's angles from GCS
 #ifndef MODE_GUIDED_NOGPS_ENABLED
-# define MODE_GUIDED_NOGPS_ENABLED ENABLED
+# define MODE_GUIDED_NOGPS_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -239,7 +237,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // System ID - conduct system identification tests on vehicle
 #ifndef MODE_SYSTEMID_ENABLED
-# define MODE_SYSTEMID_ENABLED ENABLED
+# define MODE_SYSTEMID_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -251,19 +249,26 @@
 //////////////////////////////////////////////////////////////////////////////
 // ZigZag - allow vehicle to fly in a zigzag manner with predefined point A B
 #ifndef MODE_ZIGZAG_ENABLED
-# define MODE_ZIGZAG_ENABLED ENABLED
+# define MODE_ZIGZAG_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Turtle - allow vehicle to be flipped over after a crash
 #ifndef MODE_TURTLE_ENABLED
-# define MODE_TURTLE_ENABLED HAL_DSHOT_ENABLED && FRAME_CONFIG != HELI_FRAME
+# define MODE_TURTLE_ENABLED !HAL_MINIMIZE_FEATURES && !defined(DISABLE_DSHOT) && FRAME_CONFIG != HELI_FRAME
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Flowhold - use optical flow to hover in place
 #ifndef MODE_FLOWHOLD_ENABLED
-# define MODE_FLOWHOLD_ENABLED AP_OPTICALFLOW_ENABLED
+# define MODE_FLOWHOLD_ENABLED !HAL_MINIMIZE_FEATURES && AP_OPTICALFLOW_ENABLED
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// CUSTOM mode - use custom controller  AKGL
+#ifndef MODE_CUSTOM_ENABLED
+# define MODE_CUSTOM_ENABLED ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -271,25 +276,23 @@
 //////////////////////////////////////////////////////////////////////////////
 // Weathervane - allow vehicle to yaw into wind
 #ifndef WEATHERVANE_ENABLED
-# define WEATHERVANE_ENABLED ENABLED
+# define WEATHERVANE_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // Autorotate - autonomous auto-rotation - helicopters only
-#ifndef MODE_AUTOROTATE_ENABLED
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     #if FRAME_CONFIG == HELI_FRAME
         #ifndef MODE_AUTOROTATE_ENABLED
-        # define MODE_AUTOROTATE_ENABLED ENABLED
+        # define MODE_AUTOROTATE_ENABLED !HAL_MINIMIZE_FEATURES
         #endif
     #else
         # define MODE_AUTOROTATE_ENABLED DISABLED
     #endif
 #else
     # define MODE_AUTOROTATE_ENABLED DISABLED
-#endif
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -302,23 +305,23 @@
 // FLIGHT_MODE
 //
 
-#ifndef FLIGHT_MODE_1
- # define FLIGHT_MODE_1                  Mode::Number::STABILIZE
+#ifndef FLIGHT_MODE_1                   
+ # define FLIGHT_MODE_1                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 #ifndef FLIGHT_MODE_2
- # define FLIGHT_MODE_2                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_2                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 #ifndef FLIGHT_MODE_3
- # define FLIGHT_MODE_3                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_3                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 #ifndef FLIGHT_MODE_4
- # define FLIGHT_MODE_4                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_4                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 #ifndef FLIGHT_MODE_5
- # define FLIGHT_MODE_5                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_5                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 #ifndef FLIGHT_MODE_6
- # define FLIGHT_MODE_6                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_6                  Mode::Number::CUSTOM //Mode::Number::STABILIZE    AKGL
 #endif
 
 
@@ -559,13 +562,14 @@
 //////////////////////////////////////////////////////////////////////////////
 // Fence, Rally and Terrain and AC_Avoidance defaults
 //
+#ifndef MODE_CUSTOM_ENABLED  //AKGL
 
 #ifndef AC_AVOID_ENABLED
  #define AC_AVOID_ENABLED   ENABLED
 #endif
 
 #ifndef AC_OAPATHPLANNER_ENABLED
- #define AC_OAPATHPLANNER_ENABLED   ENABLED
+ #define AC_OAPATHPLANNER_ENABLED   !HAL_MINIMIZE_FEATURES
 #endif
 
 #if MODE_FOLLOW_ENABLED && !AC_AVOID_ENABLED
@@ -604,6 +608,8 @@
   #error ModeGuided-NoGPS requires ModeGuided which is disabled
 #endif
 
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 // Developer Items
 //
@@ -638,12 +644,4 @@
 
 #ifndef AC_CUSTOMCONTROL_MULTI_ENABLED
 #define AC_CUSTOMCONTROL_MULTI_ENABLED FRAME_CONFIG == MULTICOPTER_FRAME && AP_CUSTOMCONTROL_ENABLED
-#endif
-
-#ifndef AC_PAYLOAD_PLACE_ENABLED
-#define AC_PAYLOAD_PLACE_ENABLED 1
-#endif
-
-#ifndef USER_PARAMS_ENABLED
-  #define USER_PARAMS_ENABLED DISABLED
 #endif

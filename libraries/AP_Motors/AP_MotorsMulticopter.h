@@ -105,8 +105,21 @@ public:
     // var_info for holding Parameter information
     static const struct AP_Param::GroupInfo        var_info[];
 
-protected:
+    void                set_spool_state(SpoolState state) {_spool_state = state;}
+    void                set_thrust(double thrust ) {_thrust_from_rc = thrust;} //AKGL
+    void                set_motor_output_from_nuc(double output ) {_motor_output_from_nuc = output;} //AKGL
+    int             get_in_output_func(void) { return _in_output_func;}
+    int            get_in_output_2_motors(void) { return _in_output_2_motors;}
+    int            get_setting_values(void) { return _setting_values;}
+    int            get_sending_2_motors(void) {return _sending_2_motors;}
 
+protected:
+    double _thrust_from_rc; // AKGL
+    double _motor_output_from_nuc; //AKGL
+    int _in_output_func; //AKGL
+    int _in_output_2_motors; //AKGL
+    int  _setting_values; //AKGL
+    int _sending_2_motors; //AKGL
     // run spool logic
     void                output_logic();
 
@@ -169,7 +182,6 @@ protected:
 
     // time to spool motors to min throttle
     AP_Float            _spool_up_time;
-    AP_Float            _spool_down_time;
 
     // scaling for booster motor throttle
     AP_Float            _boost_scale;

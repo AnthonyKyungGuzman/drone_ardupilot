@@ -17,10 +17,9 @@
 #endif
 
 #if APM_BUILD_TYPE(APM_BUILD_Heli)
-    // defaults to no linearisation to not break users existing setups
-    #define THRST_LIN_THST_EXPO_DEFAULT     0.0f   // set to 0 for linear and 1 for second order approximation
-    #define THRST_LIN_SPIN_MIN_DEFAULT      0.0f   // throttle out ratio which produces the minimum thrust.  (i.e. 0 ~ 1 ) of the full throttle range
-    #define THRST_LIN_SPIN_MAX_DEFAULT      1.0f   // throttle out ratio which produces the maximum thrust.  (i.e. 0 ~ 1 ) of the full throttle range
+    #define THRST_LIN_THST_EXPO_DEFAULT     0.55f   // set to 0 for linear and 1 for second order approximation
+    #define THRST_LIN_SPIN_MIN_DEFAULT      0.15f   // throttle out ratio which produces the minimum thrust.  (i.e. 0 ~ 1 ) of the full throttle range
+    #define THRST_LIN_SPIN_MAX_DEFAULT      0.95f   // throttle out ratio which produces the maximum thrust.  (i.e. 0 ~ 1 ) of the full throttle range
     #define THRST_LIN_BAT_VOLT_MAX_DEFAULT  0.0f    // voltage limiting max default
     #define THRST_LIN_BAT_VOLT_MIN_DEFAULT  0.0f    // voltage limiting min default (voltage dropping below this level will have no effect)
 #else
@@ -97,10 +96,13 @@ Thrust_Linearization::Thrust_Linearization(AP_Motors& _motors) :
 }
 
 // converts desired thrust to linearized actuator output in a range of 0~1
-float Thrust_Linearization::thrust_to_actuator(float thrust_in) const
+float Thrust_Linearization::thrust_to_actuator(float thrust_in) const  //AKGL removed volt scaling
 {
     thrust_in = constrain_float(thrust_in, 0.0, 1.0);
-    return spin_min + (spin_max - spin_min) * apply_thrust_curve_and_volt_scaling(thrust_in);
+    return spin_min + (spin_max - spin_min) * thrust_in;
+
+    // thrust_in = constrain_float(thrust_in, 0.0, 1.0);
+    // return spin_min + (spin_max - spin_min) * apply_thrust_curve_and_volt_scaling(thrust_in);
 }
 
 // inverse of above, tested with AP_Motors/examples/expo_inverse_test

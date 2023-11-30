@@ -20,7 +20,6 @@
 #include "AP_BattMonitor_Torqeedo.h"
 #include "AP_BattMonitor_FuelLevel_Analog.h"
 #include "AP_BattMonitor_Synthetic_Current.h"
-#include "AP_BattMonitor_AD7091R5.h"
 
 #include <AP_HAL/AP_HAL.h>
 
@@ -555,11 +554,6 @@ AP_BattMonitor::init()
                 drivers[instance] = new AP_BattMonitor_EFI(*this, state[instance], _params[instance]);
                 break;
 #endif // AP_BATTERY_EFI_ENABLED
-#if AP_BATTERY_AD7091R5_ENABLED
-            case Type::AD7091R5:
-                drivers[instance] = new AP_BattMonitor_AD7091R5(*this, state[instance], _params[instance]);
-                break;
-#endif// AP_BATTERY_AD7091R5_ENABLED
             case Type::NONE:
             default:
                 break;
@@ -841,25 +835,24 @@ void AP_BattMonitor::check_failsafes(void)
 // return true if any battery is pushing too much power
 bool AP_BattMonitor::overpower_detected() const
 {
-#if AP_BATTERY_WATT_MAX_ENABLED && APM_BUILD_TYPE(APM_BUILD_ArduPlane)
+    bool result = false;
     for (uint8_t instance = 0; instance < _num_instances; instance++) {
-        if (overpower_detected(instance)) {
-            return true;
-        }
+        result |= overpower_detected(instance);
     }
-#endif
-    return false;
+    return result;
 }
 
 bool AP_BattMonitor::overpower_detected(uint8_t instance) const
 {
-#if AP_BATTERY_WATT_MAX_ENABLED && APM_BUILD_TYPE(APM_BUILD_ArduPlane)
+#if APM_BUILD_TYPE(APM_BUILD_ArduPlane)
     if (instance < _num_instances && _params[instance]._watt_max > 0) {
-        const float power = state[instance].current_amps * state[instance].voltage;
+        float power = state[instance].current_amps * state[instance].voltage;
         return state[instance].healthy && (power > _params[instance]._watt_max);
     }
-#endif
     return false;
+#else
+    return false;
+#endif
 }
 
 bool AP_BattMonitor::has_cell_voltages(const uint8_t instance) const

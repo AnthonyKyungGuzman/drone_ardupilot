@@ -47,7 +47,6 @@ AP_Stats *AP_Stats::_singleton;
 // constructor
 AP_Stats::AP_Stats(void)
 {
-    AP_Param::setup_object_defaults(this, var_info);
     _singleton = this;
 }
 

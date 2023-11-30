@@ -56,14 +56,8 @@ uint64_t millis64()
 
 } // namespace AP_HAL
 
-static HAL_ESP32 hal_esp32;
-
 const AP_HAL::HAL& AP_HAL::get_HAL()
 {
-    return hal_esp32;
-}
-
-AP_HAL::HAL& AP_HAL::get_HAL_mutable()
-{
-    return hal_esp32;
+    static const HAL_ESP32 hal;
+    return hal;
 }

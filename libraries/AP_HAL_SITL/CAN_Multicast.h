@@ -13,11 +13,12 @@ public:
     bool send(const AP_HAL::CANFrame &frame) override;
     bool receive(AP_HAL::CANFrame &frame) override;
     int get_read_fd(void) const override {
-        return sock.get_read_fd();
+        return fd_in;
     }
 
 private:
-    SocketAPM sock{true};
+    int fd_in = -1;
+    int fd_out = -1;
 };
 
 #endif // HAL_NUM_CAN_IFACES

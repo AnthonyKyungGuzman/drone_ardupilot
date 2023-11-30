@@ -26,6 +26,8 @@
 #include <stdarg.h>
 
 #include <AP_HAL/AP_HAL.h>
+//AKGL
+
 
 // Common dependencies
 #include <AP_Common/AP_Common.h>            // Common definitions and utility routines for the ArduPilot libraries
@@ -42,9 +44,11 @@
 #include <AP_Mission/AP_Mission.h>                              // Mission command library
 #include <AP_Mission/AP_Mission_ChangeDetector.h>               // Mission command change detection library
 #include <AC_AttitudeControl/AC_AttitudeControl_Multi.h>        // Attitude control library
+#include <AC_AttitudeControl/AC_AttitudeControl_Custom.h>       // Attitude control library AKGL
 #include <AC_AttitudeControl/AC_AttitudeControl_Multi_6DoF.h>   // 6DoF Attitude control library
 #include <AC_AttitudeControl/AC_AttitudeControl_Heli.h>         // Attitude control library for traditional helicopter
 #include <AC_AttitudeControl/AC_PosControl.h>                   // Position control library
+#include <AC_AttitudeControl/AC_PosControl_Custom.h>                   // Position control library
 #include <AC_AttitudeControl/AC_CommandModel.h>                 // Command model library
 #include <AP_Motors/AP_Motors.h>            // AP Motors library
 #include <AP_Stats/AP_Stats.h>              // statistics library
@@ -80,7 +84,7 @@
 #if FRAME_CONFIG == HELI_FRAME
     #define AC_AttitudeControl_t AC_AttitudeControl_Heli
 #else
-    #define AC_AttitudeControl_t AC_AttitudeControl_Multi
+    #define AC_AttitudeControl_t AC_AttitudeControl_Custom
 #endif
 
 #if FRAME_CONFIG == HELI_FRAME
@@ -99,11 +103,6 @@
 #include "GCS_Copter.h"
 #include "AP_Rally.h"           // Rally point library
 #include "AP_Arming.h"
-
-#include <AP_ExternalControl/AP_ExternalControl_config.h>
-#if AP_EXTERNAL_CONTROL_ENABLED
-#include "AP_ExternalControl_Copter.h"
-#endif
 
 #include <AP_Beacon/AP_Beacon_config.h>
 #if AP_BEACON_ENABLED
@@ -174,14 +173,15 @@
   #error AP_OAPathPlanner relies on AP_FENCE_ENABLED which is disabled
 #endif
 
+// Local modules
+#ifdef USER_PARAMS_ENABLED
+#include "UserParameters.h"
+#endif
+#include "Parameters.h"
 #if HAL_ADSB_ENABLED
 #include "avoidance_adsb.h"
 #endif
-// Local modules
-#include "Parameters.h"
-#if USER_PARAMS_ENABLED
-#include "UserParameters.h"
-#endif
+
 #include "mode.h"
 
 class Copter : public AP_Vehicle {
@@ -197,9 +197,6 @@ public:
     friend class AP_AdvancedFailsafe_Copter;
 #endif
     friend class AP_Arming_Copter;
-#if AP_EXTERNAL_CONTROL_ENABLED
-    friend class AP_ExternalControl_Copter;
-#endif
     friend class ToyMode;
     friend class RC_Channel_Copter;
     friend class RC_Channels_Copter;
@@ -233,10 +230,7 @@ public:
     friend class ModeZigZag;
     friend class ModeAutorotate;
     friend class ModeTurtle;
-
-    friend class _AutoTakeoff;
-
-    friend class PayloadPlace;
+    friend class ModeCustom;
 
     Copter(void);
 
@@ -329,12 +323,6 @@ private:
 #if AP_OPTICALFLOW_ENABLED
     AP_OpticalFlow optflow;
 #endif
-
-    // external control library
-#if AP_EXTERNAL_CONTROL_ENABLED
-    AP_ExternalControl_Copter external_control;
-#endif
-
 
     // system time in milliseconds of last recorded yaw reset from ekf
     uint32_t ekfYawReset_ms;
@@ -486,6 +474,7 @@ private:
     // Attitude, Position and Waypoint navigation objects
     // To-Do: move inertial nav up or other navigation variables down here
     AC_AttitudeControl_t *attitude_control;
+    // AC_PosControl_Custom *pos_control;
     AC_PosControl *pos_control;
     AC_WPNav *wp_nav;
     AC_Loiter *loiter_nav;
@@ -716,6 +705,43 @@ private:
     bool get_wp_bearing_deg(float &bearing) const override;
     bool get_wp_crosstrack_error_m(float &xtrack_error) const override;
     bool get_rate_ef_targets(Vector3f& rate_ef_targets) const override;
+
+    //AKGL
+    typedef struct{  // UART RX buffer 128 bytes 
+        // double pos[3];
+        // double motorValue;
+        double valueToChange;
+    }nucDataRead_t;
+    typedef struct{ // UART TX buffer 256 bytes
+        uint32_t timeStamp;
+        double dt;
+        uint32_t measured_dt;
+        double changedValue;
+        int calling_output_motors;
+        int in_output_func; //AKGL
+        int in_output_2_motors; //AKGL
+        int setting_values; //AKGL
+        int sending_2_motors; //AKGL 
+        // double accel[3];
+        // double gyro[3];
+        // double accelWOBias[3];  // update of gyro with smooth part and removed bias can be seen in AHRS update 
+        // double gyroWODrift[3];
+        // double pos[3];
+        // double posKF[3];
+        // double eulerAngles[3];
+        // double ctrl[4];
+        
+        // double posGPS[2];
+    }nucDataWrite_t; 
+    AP_HAL::UARTDriver* uartNuc;
+    nucDataRead_t *dataFromNuc;
+    nucDataWrite_t dataForNuc;
+    double motorValue;
+    int _calling_output_motors;
+    void uartTask(void);
+    void copyVar2Send(void);
+    void copyRecvVar2Platform(void);
+    
 
     // Attitude.cpp
     void update_throttle_hover();
@@ -1045,6 +1071,9 @@ private:
 #endif
 #if MODE_TURTLE_ENABLED == ENABLED
     ModeTurtle mode_turtle;
+#endif
+#if MODE_CUSTOM_ENABLED == ENABLED  // AKGL
+    ModeCustom mode_custom;
 #endif
 
     // mode.cpp

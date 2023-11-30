@@ -133,7 +133,7 @@ void Copter::auto_disarm_check()
 
 // motors_output - send output to motors library which will adjust and send to ESCs and servos
 void Copter::motors_output()
-{
+{  _calling_output_motors++;
 #if ADVANCED_FAILSAFE == ENABLED
     // this is to allow the failsafe module to deliberately crash
     // the vehicle. Only used in extreme circumstances to meet the
@@ -175,6 +175,7 @@ void Copter::motors_output()
         // check if we are performing the motor test
         motor_test_output();
     } else {
+        
         // send output signals to motors
         flightmode->output_to_motors();
     }

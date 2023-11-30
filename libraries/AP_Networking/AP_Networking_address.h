@@ -1,7 +1,5 @@
 #pragma once
 
-#include <AP_Param/AP_Param.h>
-
 /*
   class for an IPV4 address as a parameter
  */
@@ -17,16 +15,10 @@ public:
     // set address from a uint32_t
     void set_uint32(uint32_t addr);
 
-    // return address as a null-terminated string
-    const char* get_str();
-
     // set default address from a uint32
     void set_default_uint32(uint32_t addr);
 
     static const struct AP_Param::GroupInfo var_info[];
-
-private:
-    char strbuf[16];
 };
 
 /*

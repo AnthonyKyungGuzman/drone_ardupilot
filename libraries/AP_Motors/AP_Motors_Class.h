@@ -184,6 +184,8 @@ public:
         SPOOLING_UP = 2,                       // increasing maximum throttle while stabilizing
         THROTTLE_UNLIMITED = 3,             // throttle is no longer constrained by start up procedure
         SPOOLING_DOWN = 4,                     // decreasing maximum throttle while stabilizing
+        MANUAL = 4,                         //AKGL 
+
     };
 
     // get_spool_state - get current spool state

@@ -155,10 +155,11 @@ public:
     AP_HAL::SIMState *simstate;
 #endif
 
-#ifndef HAL_CONSOLE_DISABLED
-# define DEV_PRINTF(fmt, args ...)  do { hal.console->printf(fmt, ## args); } while(0)
-#else
-# define DEV_PRINTF(fmt, args ...)
-#endif
+#define DEV_PRINTF(fmt, args ...) //AKGL
+// #ifndef HAL_CONSOLE_DISABLED
+// # define DEV_PRINTF(fmt, args ...)  do { hal.console->printf(fmt, ## args); } while(0)
+// #else
+// # define DEV_PRINTF(fmt, args ...)
+// #endif
 
 };

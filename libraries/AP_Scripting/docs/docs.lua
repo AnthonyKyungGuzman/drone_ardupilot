@@ -289,27 +289,11 @@ function Cylinder_Status_ud:exhaust_gas_temperature(value) end
 
 -- get field
 ---@return number
-function Cylinder_Status_ud:exhaust_gas_temperature2() end
-
--- set field
----@param value number
-function Cylinder_Status_ud:exhaust_gas_temperature2(value) end
-
--- get field
----@return number
 function Cylinder_Status_ud:cylinder_head_temperature() end
 
 -- set field
 ---@param value number
 function Cylinder_Status_ud:cylinder_head_temperature(value) end
-
--- get field
----@return number
-function Cylinder_Status_ud:cylinder_head_temperature2() end
-
--- set field
----@param value number
-function Cylinder_Status_ud:cylinder_head_temperature2(value) end
 
 -- get field
 ---@return number
@@ -2000,7 +1984,6 @@ serialLED = {}
 
 -- desc
 ---@param chan integer
----@return boolean
 function serialLED:send(chan) end
 
 -- desc
@@ -2009,7 +1992,6 @@ function serialLED:send(chan) end
 ---@param red integer
 ---@param green integer
 ---@param blue integer
----@return boolean
 function serialLED:set_RGB(chan, led_index, red, green, blue) end
 
 -- desc

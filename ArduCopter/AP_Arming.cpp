@@ -178,10 +178,11 @@ bool AP_Arming_Copter::terrain_database_required() const
         return false;
     }
 
-    if (copter.wp_nav->get_terrain_source() == AC_WPNav::TerrainSource::TERRAIN_FROM_TERRAINDATABASE &&
-        copter.mode_rtl.get_alt_type() == ModeRTL::RTLAltType::RTL_ALTTYPE_TERRAIN) {
-        return true;
-    }
+    //AKGL commented to avoid error
+    // if (copter.wp_nav->get_terrain_source() == AC_WPNav::TerrainSource::TERRAIN_FROM_TERRAINDATABASE &&
+    //     copter.mode_rtl.get_alt_type() == ModeRTL::RTLAltType::RTL_ALTTYPE_TERRAIN) {
+    //     return true;
+    // }
     return AP_Arming::terrain_database_required();
 }
 
@@ -623,7 +624,7 @@ bool AP_Arming_Copter::arm_checks(AP_Arming::Method method)
         const char *rc_item = "Throttle";
         #endif
         // check throttle is not too high - skips checks if arming from GCS/scripting in Guided,Guided_NoGPS or Auto 
-        if (!((AP_Arming::method_is_GCS(method) || method == AP_Arming::Method::SCRIPTING) && (copter.flightmode->mode_number() == Mode::Number::GUIDED || copter.flightmode->mode_number() == Mode::Number::GUIDED_NOGPS || copter.flightmode->mode_number() == Mode::Number::AUTO))) {
+        if (!((method == AP_Arming::Method::MAVLINK || method == AP_Arming::Method::SCRIPTING) && (copter.flightmode->mode_number() == Mode::Number::GUIDED || copter.flightmode->mode_number() == Mode::Number::GUIDED_NOGPS || copter.flightmode->mode_number() == Mode::Number::AUTO))) {
             // above top of deadband is too always high
             if (copter.get_pilot_desired_climb_rate(copter.channel_throttle->get_control_in()) > 0.0f) {
                 check_failed(ARMING_CHECK_RC, true, "%s too high", rc_item);
@@ -708,7 +709,7 @@ bool AP_Arming_Copter::arm(const AP_Arming::Method method, const bool do_arming_
     }
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
-    send_arm_disarm_statustext("Arming motors");
+    gcs().send_text(MAV_SEVERITY_INFO, "Arming motors");
 #endif
 
     // Remember Orientation
@@ -790,7 +791,7 @@ bool AP_Arming_Copter::disarm(const AP_Arming::Method method, bool do_disarm_che
 
     // do not allow disarm via mavlink if we think we are flying:
     if (do_disarm_checks &&
-        AP_Arming::method_is_GCS(method) &&
+        method == AP_Arming::Method::MAVLINK &&
         !copter.ap.land_complete) {
         return false;
     }
@@ -800,7 +801,7 @@ bool AP_Arming_Copter::disarm(const AP_Arming::Method method, bool do_disarm_che
     }
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
-    send_arm_disarm_statustext("Disarming motors");
+    gcs().send_text(MAV_SEVERITY_INFO, "Disarming motors");
 #endif
 
     auto &ahrs = AP::ahrs();

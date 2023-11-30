@@ -33,7 +33,6 @@ void RC_Channel_Rover::init_aux_function(const aux_func_t ch_option, const AuxSw
     // the following functions do not need initialising:
     case AUX_FUNC::ACRO:
     case AUX_FUNC::AUTO:
-    case AUX_FUNC::CIRCLE:
     case AUX_FUNC::FOLLOW:
     case AUX_FUNC::GUIDED:
     case AUX_FUNC::HOLD:
@@ -225,10 +224,6 @@ bool RC_Channel_Rover::do_aux_function(const aux_func_t ch_option, const AuxSwit
     // set mode to Simple
     case AUX_FUNC::SIMPLE:
         do_aux_function_change_mode(rover.mode_simple, ch_flag);
-        break;
-
-    case AUX_FUNC::CIRCLE:
-        do_aux_function_change_mode(rover.g2.mode_circle, ch_flag);
         break;
 
     // trigger sailboat tack

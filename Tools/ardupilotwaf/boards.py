@@ -148,12 +148,6 @@ class Board:
             )
             cfg.msg("Enabled custom controller", 'no', color='YELLOW')
 
-        if cfg.options.disable_networking:
-            env.CXXFLAGS += ['-DAP_NETWORKING_ENABLED=0']
-
-        if cfg.options.enable_networking_tests:
-            env.CXXFLAGS += ['-DAP_NETWORKING_TESTS_ENABLED=1']
-            
         d = env.get_merged_dict()
         # Always prepend so that arguments passed in the command line get
         # the priority.
@@ -462,8 +456,8 @@ class Board:
         # We always want to use PRI format macros
         cfg.define('__STDC_FORMAT_MACROS', 1)
 
-        if cfg.options.enable_ekf2:
-            env.CXXFLAGS += ['-DHAL_NAVEKF2_AVAILABLE=1']
+        if cfg.options.disable_ekf2:
+            env.CXXFLAGS += ['-DHAL_NAVEKF2_AVAILABLE=0']
 
         if cfg.options.disable_ekf3:
             env.CXXFLAGS += ['-DHAL_NAVEKF3_AVAILABLE=0']
@@ -654,12 +648,6 @@ class sitl(Board):
         cfg.define('AP_NOTIFY_LP5562_BUS', 2)
         cfg.define('AP_NOTIFY_LP5562_ADDR', 0x30)
 
-        try:
-            env.CXXFLAGS.remove('-DHAL_NAVEKF2_AVAILABLE=0')
-        except ValueError:
-            pass
-        env.CXXFLAGS += ['-DHAL_NAVEKF2_AVAILABLE=1']
-
         if self.with_can:
             cfg.define('HAL_NUM_CAN_IFACES', 2)
             env.DEFINES.update(CANARD_MULTI_IFACE=1,
@@ -680,9 +668,6 @@ class sitl(Board):
             '-Werror=missing-declarations',
         ]
 
-        if not cfg.options.disable_networking:
-            env.CXXFLAGS += ['-DAP_NETWORKING_ENABLED=1']
-        
         if cfg.options.ubsan or cfg.options.ubsan_abort:
             env.CXXFLAGS += [
                 "-fsanitize=undefined",
@@ -799,7 +784,6 @@ class sitl(Board):
         # whitelist of compilers which we should build with -Werror
         gcc_whitelist = frozenset([
                 ('11','3','0'),
-                ('11','4','0'),
                 ('12','1','0'),
             ])
 
@@ -847,7 +831,6 @@ class sitl_periph_gps(sitl):
             HAL_PERIPH_ENABLE_RPM = 1,
             HAL_PERIPH_ENABLE_RC_OUT = 1,
             HAL_PERIPH_ENABLE_ADSB = 1,
-            AP_ICENGINE_ENABLED = 0,
             AP_AIRSPEED_ENABLED = 1,
             AP_AIRSPEED_AUTOCAL_ENABLE = 0,
             AP_AHRS_ENABLED = 1,
@@ -878,17 +861,13 @@ class sitl_periph_gps(sitl):
             AP_CAN_SLCAN_ENABLED = 0,
             HAL_PROXIMITY_ENABLED = 0,
             AP_SCRIPTING_ENABLED = 0,
+            HAL_NAVEKF2_AVAILABLE = 0,
             HAL_NAVEKF3_AVAILABLE = 0,
             HAL_PWM_COUNT = 32,
             HAL_WITH_ESC_TELEM = 1,
             AP_RTC_ENABLED = 0,
         )
 
-        try:
-            env.CXXFLAGS.remove('-DHAL_NAVEKF2_AVAILABLE=1')
-        except ValueError:
-            pass
-        env.CXXFLAGS += ['-DHAL_NAVEKF2_AVAILABLE=0']
 
 class esp32(Board):
     abstract = True
@@ -1149,8 +1128,7 @@ class chibios(Board):
         ]
 
         env.INCLUDES += [
-            cfg.srcnode.find_dir('libraries/AP_GyroFFT/CMSIS_5/include').abspath(),
-            cfg.srcnode.find_dir('modules/ChibiOS/ext/lwip/src/include/compat/posix').abspath()
+            cfg.srcnode.find_dir('libraries/AP_GyroFFT/CMSIS_5/include').abspath()
         ]
 
         # whitelist of compilers which we should build with -Werror
@@ -1161,7 +1139,6 @@ class chibios(Board):
             ('9','3','1'),
             ('10','2','1'),
             ('11','3','0'),
-            ('11','4','0'),
         ])
 
         if cfg.env.HAL_CANFD_SUPPORTED:

@@ -24,7 +24,7 @@
 // 6 here is AP_Motors::MOTOR_FRAME_HELI
 #define DEFAULT_FRAME_CLASS 6
 #else
-#define DEFAULT_FRAME_CLASS 0
+#define DEFAULT_FRAME_CLASS 1 // AKGL set up Frame Class as Quad
 #endif
 
 const AP_Param::Info Copter::var_info[] = {
@@ -46,7 +46,6 @@ const AP_Param::Info Copter::var_info[] = {
     // @DisplayName: My ground station number
     // @Description: Allows restricting radio overrides to only come from my ground station
     // @Range: 1 255
-    // @Increment: 1
     // @User: Advanced
     GSCALAR(sysid_my_gcs,   "SYSID_MYGCS",     255),
 
@@ -298,7 +297,8 @@ const AP_Param::Info Copter::var_info[] = {
     // @Description: This selects the mode to start in on boot. This is useful for when you want to start in AUTO mode on boot without a receiver.
     // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,14:Flip,15:AutoTune,16:PosHold,17:Brake,18:Throw,19:Avoid_ADSB,20:Guided_NoGPS,21:Smart_RTL,22:FlowHold,23:Follow,24:ZigZag,25:SystemID,26:Heli_Autorotate
     // @User: Advanced
-    GSCALAR(initial_mode,        "INITIAL_MODE",     (uint8_t)Mode::Number::STABILIZE),
+    // GSCALAR(initial_mode,        "INITIAL_MODE",     (uint8_t)Mode::Number::STABILIZE),
+    GSCALAR(initial_mode,        "INITIAL_MODE",     (uint8_t)Mode::Number::CUSTOM), //AKGL
 
     // @Param: SIMPLE
     // @DisplayName: Simple mode bitmask
@@ -839,11 +839,9 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // 18 was used by AP_VisualOdom
 
-#if AP_TEMPCALIBRATION_ENABLED
     // @Group: TCAL
     // @Path: ../libraries/AP_TempCalibration/AP_TempCalibration.cpp
     AP_SUBGROUPINFO(temp_calibration, "TCAL", 19, ParametersG2, AP_TempCalibration),
-#endif
 
 #if TOY_MODE_ENABLED == ENABLED
     // @Group: TMODE
@@ -895,7 +893,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(follow, "FOLL", 27, ParametersG2, AP_Follow),
 #endif
 
-#if USER_PARAMS_ENABLED == ENABLED
+#ifdef USER_PARAMS_ENABLED
     AP_SUBGROUPINFO(user_parameters, "USR", 28, ParametersG2, UserParameters),
 #endif
 
@@ -1044,7 +1042,8 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:Do not track, 1:Ground, 2:Ceiling
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Copter::SurfaceTracking::Surface::GROUND),
+    // AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Copter::SurfaceTracking::Surface::GROUND),
+    AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Copter::SurfaceTracking::Surface::NONE), // AKGL
 
     // @Param: FS_DR_ENABLE
     // @DisplayName: DeadReckon Failsafe Action
@@ -1239,10 +1238,7 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
   constructor for g2 object
  */
 ParametersG2::ParametersG2(void)
-    : command_model_pilot(PILOT_Y_RATE_DEFAULT, PILOT_Y_EXPO_DEFAULT, 0.0f)
-#if AP_TEMPCALIBRATION_ENABLED
-    , temp_calibration()
-#endif
+    : temp_calibration() // this doesn't actually need constructing, but removing it here is problematic syntax-wise
 #if AP_BEACON_ENABLED
     , beacon()
 #endif
@@ -1261,7 +1257,7 @@ ParametersG2::ParametersG2(void)
 #if MODE_FOLLOW_ENABLED == ENABLED
     ,follow()
 #endif
-#if USER_PARAMS_ENABLED == ENABLED
+#ifdef USER_PARAMS_ENABLED
     ,user_parameters()
 #endif
 #if AUTOTUNE_ENABLED == ENABLED
@@ -1287,6 +1283,8 @@ ParametersG2::ParametersG2(void)
 #if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
     ,command_model_acro_y(ACRO_Y_RATE_DEFAULT, ACRO_Y_EXPO_DEFAULT, 0.0f)
 #endif
+
+    ,command_model_pilot(PILOT_Y_RATE_DEFAULT, PILOT_Y_EXPO_DEFAULT, 0.0f)
 
 #if WEATHERVANE_ENABLED == ENABLED
     ,weathervane()

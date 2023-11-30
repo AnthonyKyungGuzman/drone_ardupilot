@@ -422,7 +422,6 @@ void Plane::throttle_voltage_comp(int8_t &min_throttle, int8_t &max_throttle) co
 /*
   calculate any throttle limits based on the watt limiter
  */
-#if AP_BATTERY_WATT_MAX_ENABLED
 void Plane::throttle_watt_limiter(int8_t &min_throttle, int8_t &max_throttle)
 {
     uint32_t now = millis();
@@ -467,7 +466,6 @@ void Plane::throttle_watt_limiter(int8_t &min_throttle, int8_t &max_throttle)
         min_throttle = constrain_int16(min_throttle, min_throttle + throttle_watt_limit_min, 0);
     }
 }
-#endif // #if AP_BATTERY_WATT_MAX_ENABLED
     
 /*
   setup output channels all non-manual modes
@@ -511,10 +509,8 @@ void Plane::set_servos_controlled(void)
     // compensate for battery voltage drop
     throttle_voltage_comp(min_throttle, max_throttle);
 
-#if AP_BATTERY_WATT_MAX_ENABLED
     // apply watt limiter
     throttle_watt_limiter(min_throttle, max_throttle);
-#endif
 
     SRV_Channels::set_output_scaled(SRV_Channel::k_throttle,
                                     constrain_float(SRV_Channels::get_output_scaled(SRV_Channel::k_throttle), min_throttle, max_throttle));
@@ -551,7 +547,9 @@ void Plane::set_servos_controlled(void)
                control_mode == &mode_fbwa ||
                control_mode == &mode_autotune) {
         // a manual throttle mode
-        if (g.throttle_passthru_stabilize) {
+        if (!rc().has_valid_input()) {
+            SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, g.throttle_passthru_stabilize ? 0.0 : MAX(min_throttle,0));
+        } else if (g.throttle_passthru_stabilize) {
             // manual pass through of throttle while in FBWA or
             // STABILIZE mode with THR_PASS_STAB set
             SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, get_throttle_input(true));

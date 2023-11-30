@@ -85,7 +85,7 @@
 #error "Unsupported MCU for FDCAN"
 #endif
 
-extern const AP_HAL::HAL& hal;
+extern AP_HAL::HAL& hal;
 
 #define STR(x) #x
 #define XSTR(x) STR(x)
@@ -568,7 +568,7 @@ bool CANIface::init(const uint32_t bitrate, const uint32_t fdbitrate, const Oper
     if (can_ifaces[self_index_] == nullptr) {
         can_ifaces[self_index_] = this;
 #if !defined(HAL_BOOTLOADER_BUILD)
-        AP_HAL::get_HAL_mutable().can[self_index_] = this;
+        hal.can[self_index_] = this;
 #endif
     }
 

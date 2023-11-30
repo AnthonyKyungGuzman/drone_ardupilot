@@ -358,21 +358,21 @@ bool AP_OSD::init_backend(const AP_OSD::osd_types type, const uint8_t instance)
 
 #if OSD_ENABLED
 void AP_OSD::osd_thread()
-{
-    // initialize thread specific code once
-    for (uint8_t instance = 0; instance < _backend_count; instance++) {
-        _backends[instance]->osd_thread_run_once();
-    }
+{ // AKGL commented function
+    // // initialize thread specific code once
+    // for (uint8_t instance = 0; instance < _backend_count; instance++) {
+    //     _backends[instance]->osd_thread_run_once();
+    // }
 
 
-    while (true) {
-        hal.scheduler->delay(100);
-        if (!_disable) {
-            update_stats();
-            update_current_screen();
-        }
-        update_osd();
-    }
+    // while (true) {
+    //     hal.scheduler->delay(100);
+    //     if (!_disable) {
+    //         update_stats();
+    //         update_current_screen();
+    //     }
+    //     update_osd();
+    // }
 }
 
 void AP_OSD::update_osd()

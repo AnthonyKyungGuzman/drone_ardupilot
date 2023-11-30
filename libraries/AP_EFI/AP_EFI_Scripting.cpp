@@ -1,9 +1,6 @@
-#include "AP_EFI_config.h"
-
-#if AP_EFI_SCRIPTING_ENABLED
-
 #include "AP_EFI_Scripting.h"
 
+#if AP_EFI_SCRIPTING_ENABLED
 
 // Called from frontend to update with the readings received by handler
 void AP_EFI_Scripting::update()

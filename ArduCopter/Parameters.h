@@ -522,10 +522,8 @@ public:
     // ground effect compensation enable/disable
     AP_Int8 gndeffect_comp_enabled;
 
-#if AP_TEMPCALIBRATION_ENABLED
     // temperature calibration handling
     AP_TempCalibration temp_calibration;
-#endif
 
 #if AP_BEACON_ENABLED
     // beacon (non-GPS positioning) library
@@ -591,7 +589,7 @@ public:
     AP_Follow follow;
 #endif
 
-#if USER_PARAMS_ENABLED == ENABLED
+#ifdef USER_PARAMS_ENABLED
     // User custom parameters
     UserParameters user_parameters;
 #endif
@@ -657,6 +655,10 @@ public:
     AP_Int32 guided_options;
 #endif
 
+#if MODE_CUSTOM_ENABLED == ENABLED
+    AP_Int32 custom_options;
+#endif
+
     AP_Float fs_gcs_timeout;
 
 #if MODE_RTL_ENABLED == ENABLED
@@ -671,6 +673,10 @@ public:
 
 #if MODE_GUIDED_ENABLED == ENABLED
     AP_Float guided_timeout;
+#endif
+
+#if MODE_CUSTOM_ENABLED == ENABLED
+    AP_Float custom_timeout;
 #endif
 
     AP_Int8                 surftrak_mode;

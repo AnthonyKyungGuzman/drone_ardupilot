@@ -109,6 +109,7 @@ SCHED_TASK_CLASS arguments:
  - priority (0 through 255, lower number meaning higher priority)
 
  */
+/*
 const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     // update INS immediately to get current gyro data populated
     FAST_TASK_CLASS(AP_InertialSensor, &copter.ins, update),
@@ -144,7 +145,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     FAST_TASK_CLASS(AP_Mount, &copter.camera_mount, update_fast),
 #endif
     FAST_TASK(Log_Video_Stabilisation),
-
+    FAST_TASK(uartTask),                //AKGL
     SCHED_TASK(rc_loop,              250,    130,  3),
     SCHED_TASK(throttle_loop,         50,     75,  6),
     SCHED_TASK_CLASS(AP_GPS,               &copter.gps,                 update,          50, 200,   9),
@@ -220,9 +221,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if AP_RPM_ENABLED
     SCHED_TASK_CLASS(AP_RPM,               &copter.rpm_sensor,          update,          40, 200, 129),
 #endif
-#if AP_TEMPCALIBRATION_ENABLED
     SCHED_TASK_CLASS(AP_TempCalibration,   &copter.g2.temp_calibration, update,          10, 100, 135),
-#endif
 #if HAL_ADSB_ENABLED
     SCHED_TASK(avoidance_adsb_update, 10,    100, 138),
 #endif
@@ -260,6 +259,68 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_Stats,             &copter.g2.stats,            update,           1, 100, 171),
 #endif
 };
+*/
+
+const AP_Scheduler::Task Copter::scheduler_tasks[] = {
+    //    FAST_TASK(uartTask), 
+       FAST_TASK(motors_output),                //AKGL
+       SCHED_TASK(uartTask,              1000,   200,  1),
+       
+};
+
+
+// const AP_Scheduler::Task Copter::scheduler_tasks[] = {
+//     FAST_TASK(uartTask),                //AKGL
+//     // update INS immediately to get current gyro data populated
+//     FAST_TASK_CLASS(AP_InertialSensor, &copter.ins, update),
+//     // run low level rate controllers that only require IMU data
+//     FAST_TASK(run_rate_controller),   // AKGL does not runs controller, only updates the dt for POS, CONTROL AND MOTORS
+//     // run EKF state estimator (expensive)
+//     FAST_TASK(read_AHRS),
+//     // Inertial Nav
+//     // FAST_TASK(read_inertia), ----- AKGL might be useful later
+//     // check if ekf has reset target heading or position
+//     // FAST_TASK(check_ekf_reset),   ----- AKGL might be useful later
+//     // run the attitude controllers
+//     FAST_TASK(update_flight_mode),  //AKGL runs controller
+//     // update home from EKF if necessary
+//     // FAST_TASK(update_home_from_EKF),    ----- AKGL might be useful later
+//     // send outputs to the motors library immediately
+//     FAST_TASK(motors_output),
+//     // check if we've landed or crashed
+//     // FAST_TASK(update_land_and_crash_detectors),
+//     // surface tracking update
+//     // FAST_TASK(update_rangefinder_terrain_offset),
+//     // FAST_TASK(Log_Video_Stabilisation),
+//     SCHED_TASK(rc_loop,              250,    130,  3),
+//     // SCHED_TASK(throttle_loop,         50,     75,  6),
+//     // SCHED_TASK_CLASS(AP_GPS,               &copter.gps,                 update,          50, 200,   9),   // AKGL removed GPS pose update
+//     // SCHED_TASK(update_batt_compass,   10,    120, 15),  //AKGL might be useful later if enabled, uncomment in motors thr_lin.update_lift_max_from_batt_voltage();
+//     SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&copter.g2.rc_channels, read_aux_all,    10,  50,  18),
+//     // SCHED_TASK(arm_motors_check,      10,     50, 21),
+//     // SCHED_TASK(auto_disarm_check,     10,     50,  27),
+//     // SCHED_TASK(auto_trim,             10,     75,  30),
+//     //reads barometer
+//     // SCHED_TASK(update_altitude,       10,    100,  42),  //AKGL might be useful later
+//     // SCHED_TASK(run_nav_updates,       50,    100,  45),
+//     // SCHED_TASK(update_throttle_hover,100,     90,  48),
+//     // SCHED_TASK(three_hz_loop,          3,     75, 57),
+//     // SCHED_TASK_CLASS(AP_Baro,              &copter.barometer,             accumulate,    50,  90,  63), //AKGL might be useful later
+//     // SCHED_TASK(one_hz_loop,            1,    100,  81),
+//     // SCHED_TASK(ekf_check,             10,     75,  84),  ----- AKGL might be useful later
+//     // SCHED_TASK(check_vibration,       10,     50,  87),
+//     // SCHED_TASK(gpsglitch_check,       10,     50,  90), ----- AKGL might be useful later 
+//     // SCHED_TASK(takeoff_check,         50,     50,  91),
+//     // SCHED_TASK(standby_update,        100,    75,  96),
+//     // SCHED_TASK(lost_vehicle_check,    10,     50,  99),
+//     // SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_receive, 400, 180, 102),
+//     // SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_send,    400, 550, 105),
+//     // SCHED_TASK_CLASS(AP_InertialSensor,    &copter.ins,                 periodic,       400,  50, 123),
+//     // SCHED_TASK_CLASS(AP_Scheduler,         &copter.scheduler,           update_logging, 0.1,  75, 126),
+
+// };
+
+
 
 void Copter::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
                                  uint8_t &task_count,
@@ -477,7 +538,7 @@ void Copter::rc_loop()
     // Read radio and 3-position switch on radio
     // -----------------------------------------
     read_radio();
-    rc().read_mode_switch();
+    // rc().read_mode_switch();
 }
 
 // throttle_loop - should be run at 50 hz
@@ -671,13 +732,6 @@ void Copter::one_hz_loop()
 #endif
 
     AP_Notify::flags.flying = !ap.land_complete;
-
-    // slowly update the PID notches with the average loop rate
-    attitude_control->set_notch_sample_rate(AP::scheduler().get_filtered_loop_rate_hz());
-    pos_control->get_accel_z_pid().set_notch_sample_rate(AP::scheduler().get_filtered_loop_rate_hz());
-#if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
-    custom_control.set_notch_sample_rate(AP::scheduler().get_filtered_loop_rate_hz());
-#endif
 }
 
 void Copter::init_simple_bearing()
@@ -753,7 +807,7 @@ void Copter::update_super_simple_bearing(bool force_update)
 
 void Copter::read_AHRS(void)
 {
-    // we tell AHRS to skip INS update as we have already done it in FAST_TASK.
+    // we tell AHRS to skip INS update as we have already done it in fast_loop()
     ahrs.update(true);
 }
 
@@ -810,6 +864,70 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
     return true;
 }
 
+void Copter::uartTask(void)
+{
+    
+    if(uartNuc->available())
+    {
+        //read(uint8_t *buffer, uint16_t count)
+        uartNuc->read((uint8_t*)dataFromNuc, sizeof(nucDataRead_t));
+        copyRecvVar2Platform();
+    }
+    //write(const uint8_t *buffer, size_t size)
+    copyVar2Send();
+    uartNuc->write((const uint8_t *)&dataForNuc, sizeof(nucDataWrite_t));
+    // char test[] = "hola"; 
+    // uartNuc->write((const uint8_t *)&test, 4);
+
+}
+
+void Copter::copyVar2Send(void)
+{
+    static uint32_t prevTimeStamp = 0;
+    dataForNuc.timeStamp = AP_HAL::micros();
+    dataForNuc.dt = (double)AP::scheduler().get_last_loop_time_s();
+    dataForNuc.measured_dt = AP_HAL::micros() - prevTimeStamp;
+    prevTimeStamp = AP_HAL::micros();
+    dataForNuc.changedValue = dataFromNuc->valueToChange + 1.1; 
+
+    dataForNuc.calling_output_motors = _calling_output_motors;
+    dataForNuc.in_output_func = motors->get_in_output_func();
+    dataForNuc.in_output_2_motors = motors->get_in_output_2_motors();
+    dataForNuc.setting_values = motors->get_setting_values();
+    dataForNuc.sending_2_motors = motors->get_sending_2_motors();
+       
+    // //Accel and Gyro from IMU
+    // const Vector3f &gyro = AP::ins().get_gyro();
+    // const Vector3f &accel = AP::ins().get_accel();
+    // dataForNuc.accel[0] = accel.x;
+    // dataForNuc.accel[1] = accel.y;
+    // dataForNuc.accel[2] = accel.z;
+    // dataForNuc.gyro[0] = gyro.x;
+    // dataForNuc.gyro[1] = gyro.y;
+    // dataForNuc.gyro[2] = gyro.z;
+    // // Accel and Gyro w/o drift and bias
+    // const Vector3f &gyroWODrift = ahrs.get_gyro_latest();
+    // const Vector3f &accelWOBias = ahrs.get_accel() - ahrs.get_accel_bias();
+    // dataForNuc.accelWOBias[0] = accelWOBias.x;
+    // dataForNuc.accelWOBias[1] = accelWOBias.y;
+    // dataForNuc.accelWOBias[2] = accelWOBias.z;
+    // dataForNuc.gyroWODrift[0] = gyroWODrift.x;
+    // dataForNuc.gyroWODrift[1] = gyroWODrift.y;
+    // dataForNuc.gyroWODrift[2] = gyroWODrift.z;
+    // //Euler angles
+    // dataForNuc.eulerAngles[0] = ahrs.get_roll();
+    // dataForNuc.eulerAngles[1] = ahrs.get_pitch();
+    // dataForNuc.eulerAngles[2] = ahrs.get_yaw();
+}
+
+void Copter::copyRecvVar2Platform(void)
+{
+    // control.updatePos(dataFromNuc.pos);
+    // motorValue = dataFromNuc->motorValue;
+    motorValue = 0.0;
+}
+
+
 /*
   constructor for main Copter class
  */
@@ -824,9 +942,15 @@ Copter::Copter(void)
     param_loader(var_info),
     flightmode(&mode_stabilize)
 {
+    // uartNuc = hal.serial(5);
+    uartNuc = hal.serial(0); // Cube USB 
+    motorValue = 0;
+    dataFromNuc->valueToChange = 0.0; // init struct
+    _calling_output_motors = 0;
 }
 
 Copter copter;
 AP_Vehicle& vehicle = copter;
 
 AP_HAL_MAIN_CALLBACKS(&copter);
+

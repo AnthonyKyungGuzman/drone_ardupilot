@@ -50,5 +50,7 @@ def test_virtual_ports(launch_context, launch_description):
     def validate_output(output):
         assert "N starting data transfer loop" in output, "Test process had no output."
 
-    process_tools.assert_stderr_sync(launch_context, virtual_ports, validate_output, timeout=5)
+    process_tools.assert_stderr_sync(
+        launch_context, virtual_ports, validate_output, timeout=5
+    )
     yield

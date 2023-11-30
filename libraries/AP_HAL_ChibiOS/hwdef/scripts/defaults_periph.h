@@ -122,10 +122,6 @@
 #define AP_BATTERY_ESC_ENABLED 0
 #endif
 
-#ifndef AP_BATTERY_WATT_MAX_ENABLED
-#define AP_BATTERY_WATT_MAX_ENABLED 0
-#endif
-
 // disable compass calibrations on periphs; cal is done on the autopilot
 #ifndef COMPASS_CAL_ENABLED
 #define COMPASS_CAL_ENABLED 0
@@ -389,10 +385,3 @@
 #define AP_TERRAIN_AVAILABLE 0
 #endif
 
-#ifndef AP_ICENGINE_ENABLED
-#define AP_ICENGINE_ENABLED 0
-#endif
-
-#ifndef AP_FILTER_ENABLED
-#define AP_FILTER_ENABLED 0
-#endif

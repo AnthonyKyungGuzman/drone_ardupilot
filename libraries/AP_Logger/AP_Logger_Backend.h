@@ -12,6 +12,8 @@
 
 class LoggerMessageWriter_DFLogStart;
 
+#define MAX_LOG_FILES 500
+
 // class to handle rate limiting of log messages
 class AP_Logger_RateLimiter
 {

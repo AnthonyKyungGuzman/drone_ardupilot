@@ -4,19 +4,17 @@
 
 #if AP_NETWORKING_ENABLED
 
-#include "AP_Networking.h"
-
 class AP_Networking;
 
-class AP_Networking_Backend
+class AP_Networking_backend
 {
 public:
     friend class AP_Networking;
 
-    AP_Networking_Backend(AP_Networking &_frontend) : frontend(_frontend) {}
+    AP_Networking_backend(AP_Networking &_frontend) : frontend(_frontend) {}
 
     /* Do not allow copies */
-    CLASS_NO_COPY(AP_Networking_Backend);
+    CLASS_NO_COPY(AP_Networking_backend);
 
     virtual bool init() = 0;
     virtual void update() = 0;

@@ -5,8 +5,6 @@
 #include <dronecan_msgs.h>
 
 class AP_DroneCAN;
-class CANSensor;
-
 class CanardInterface : public Canard::Interface {
     friend class AP_DroneCAN;
 public:
@@ -50,12 +48,6 @@ public:
 
     bool add_interface(AP_HAL::CANIface *can_drv);
 
-    // add an auxillary driver for 11 bit frames
-    bool add_11bit_driver(CANSensor *sensor);
-
-    // handler for outgoing frames for auxillary drivers
-    bool write_aux_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_us);
-    
 #if AP_TEST_DRONECAN_DRIVERS
     static CanardInterface& get_test_iface() { return test_iface; }
     static void processTestRx();
@@ -78,8 +70,5 @@ private:
     HAL_Semaphore _sem_rx;
     CanardTxTransfer tx_transfer;
     dronecan_protocol_Stats protocol_stats;
-
-    // auxillary 11 bit CANSensor
-    CANSensor *aux_11bit_driver;
 };
 #endif // HAL_ENABLE_DRONECAN_DRIVERS

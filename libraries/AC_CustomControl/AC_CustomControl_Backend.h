@@ -7,7 +7,8 @@
 class AC_CustomControl_Backend
 {
 public:
-    AC_CustomControl_Backend(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl_Multi*& att_control, AP_MotorsMulticopter*& motors, float dt) :
+    // AC_CustomControl_Backend(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl_Multi*& att_control, AP_MotorsMulticopter*& motors, float dt) :
+    AC_CustomControl_Backend(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl_Custom*& att_control, AP_MotorsMulticopter*& motors, float dt) : //AKGL
         _frontend(frontend),
         _ahrs(ahrs),
         _att_control(att_control),
@@ -23,13 +24,11 @@ public:
     // reset controller to avoid build up or abrupt response upon switch, ex: integrator, filter
     virtual void reset() = 0;
 
-    // set the PID notch sample rates
-    virtual void set_notch_sample_rate(float sample_rate) {};
-
 protected:
     // References to external libraries
     AP_AHRS_View*& _ahrs;
-    AC_AttitudeControl_Multi*& _att_control;
+    // AC_AttitudeControl_Multi*& _att_control;
+    AC_AttitudeControl_Custom*& _att_control; //AKGL
     AP_MotorsMulticopter*& _motors;
     AC_CustomControl& _frontend;
 };

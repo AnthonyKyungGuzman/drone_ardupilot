@@ -21,8 +21,6 @@
 #include <AP_HAL/AP_HAL.h>
 
 class AP_CANManager;
-class CANSensor;
-
 class AP_CANDriver
 {
 public:
@@ -36,9 +34,4 @@ public:
     // link protocol drivers with interfaces by adding reference to CANIface
     virtual bool add_interface(AP_HAL::CANIface* can_iface) = 0;
 
-    // add an 11 bit auxillary driver
-    virtual bool add_11bit_driver(CANSensor *sensor) { return false; }
-
-    // handler for outgoing frames for auxillary drivers
-    virtual bool write_aux_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_us) { return false; }
 };

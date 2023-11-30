@@ -25,10 +25,6 @@ Mode::Mode(void) :
     G_Dt(copter.G_Dt)
 { };
 
-#if AC_PAYLOAD_PLACE_ENABLED
-PayloadPlace Mode::payload_place;
-#endif
-
 // return the static controller object corresponding to supplied mode
 Mode *Copter::mode_from_mode_num(const Mode::Number mode)
 {
@@ -179,6 +175,12 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
+#if MODE_CUSTOM_ENABLED == ENABLED  //AKGL
+        case Mode::Number::CUSTOM:
+            ret = &mode_custom;
+            break;
+#endif
+
         default:
             break;
     }
@@ -226,7 +228,9 @@ bool Copter::gcs_mode_enabled(const Mode::Number mode_num)
         (uint8_t)Mode::Number::SYSTEMID,
         (uint8_t)Mode::Number::AUTOROTATE,
         (uint8_t)Mode::Number::AUTO_RTL,
-        (uint8_t)Mode::Number::TURTLE
+        (uint8_t)Mode::Number::TURTLE,
+        (uint8_t)Mode::Number::CUSTOM,  //AKGL
+
     };
 
     if (!block_GCS_mode_change((uint8_t)mode_num, mode_list, ARRAY_SIZE(mode_list))) {
@@ -269,16 +273,16 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     }
 
     // Check if GCS mode change is disabled via parameter
-    if ((reason == ModeReason::GCS_COMMAND) && !gcs_mode_enabled(mode)) {
-        return false;
-    }
+    // if ((reason == ModeReason::GCS_COMMAND) && !gcs_mode_enabled(mode)) {
+    //     return false;
+    // }
 
-#if MODE_AUTO_ENABLED == ENABLED
-    if (mode == Mode::Number::AUTO_RTL) {
-        // Special case for AUTO RTL, not a true mode, just AUTO in disguise
-        return mode_auto.jump_to_landing_sequence_auto_RTL(reason);
-    }
-#endif
+// #if MODE_AUTO_ENABLED == ENABLED
+//     if (mode == Mode::Number::AUTO_RTL) {
+//         // Special case for AUTO RTL, not a true mode, just AUTO in disguise
+//         return mode_auto.jump_to_landing_sequence_auto_RTL(reason);
+//     }
+// #endif
 
     Mode *new_flightmode = mode_from_mode_num(mode);
     if (new_flightmode == nullptr) {
@@ -286,7 +290,9 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
         return false;
     }
 
+    //TODO_AKGL: Check if there is no error
     bool ignore_checks = !motors->armed();   // allow switching to any mode if disarmed.  We rely on the arming check to perform
+    new_flightmode->init(ignore_checks);
 
 #if FRAME_CONFIG == HELI_FRAME
     // do not allow helis to enter a non-manual throttle mode if the
@@ -313,81 +319,81 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     // into a manual throttle mode from a non-manual-throttle mode
     // (e.g. user arms in guided, raises throttle to 1300 (not enough to
     // trigger auto takeoff), then switches into manual):
-    bool user_throttle = new_flightmode->has_manual_throttle();
+    // bool user_throttle = new_flightmode->has_manual_throttle();
 #if MODE_DRIFT_ENABLED == ENABLED
     if (new_flightmode == &mode_drift) {
         user_throttle = true;
     }
 #endif
-    if (!ignore_checks &&
-        ap.land_complete &&
-        user_throttle &&
-        !copter.flightmode->has_manual_throttle() &&
-        new_flightmode->get_pilot_desired_throttle() > copter.get_non_takeoff_throttle()) {
-        mode_change_failed(new_flightmode, "throttle too high");
-        return false;
-    }
+    // if (!ignore_checks &&
+    //     ap.land_complete &&
+    //     user_throttle &&
+    //     !copter.flightmode->has_manual_throttle() &&
+    //     new_flightmode->get_pilot_desired_throttle() > copter.get_non_takeoff_throttle()) {
+    //     mode_change_failed(new_flightmode, "throttle too high");
+    //     return false;
+    // }
 #endif
 
-    if (!ignore_checks &&
-        new_flightmode->requires_GPS() &&
-        !copter.position_ok()) {
-        mode_change_failed(new_flightmode, "requires position");
-        return false;
-    }
+    // if (!ignore_checks &&
+    //     new_flightmode->requires_GPS() &&
+    //     !copter.position_ok()) {
+    //     mode_change_failed(new_flightmode, "requires position");
+    //     return false;
+    // }
 
     // check for valid altitude if old mode did not require it but new one does
     // we only want to stop changing modes if it could make things worse
-    if (!ignore_checks &&
-        !copter.ekf_alt_ok() &&
-        flightmode->has_manual_throttle() &&
-        !new_flightmode->has_manual_throttle()) {
-        mode_change_failed(new_flightmode, "need alt estimate");
-        return false;
-    }
+    // if (!ignore_checks &&
+    //     !copter.ekf_alt_ok() &&
+    //     flightmode->has_manual_throttle() &&
+    //     !new_flightmode->has_manual_throttle()) {
+    //     mode_change_failed(new_flightmode, "need alt estimate");
+    //     return false;
+    // }
 
-    if (!new_flightmode->init(ignore_checks)) {
-        mode_change_failed(new_flightmode, "init failed");
-        return false;
-    }
+    // if (!new_flightmode->init(ignore_checks)) {
+    //     mode_change_failed(new_flightmode, "init failed");
+    //     return false;
+    // }
 
     // perform any cleanup required by previous flight mode
-    exit_mode(flightmode, new_flightmode);
+    // exit_mode(flightmode, new_flightmode);
 
     // store previous flight mode (only used by tradeheli's autorotation)
-    prev_control_mode = flightmode->mode_number();
+    // prev_control_mode = flightmode->mode_number();
 
     // update flight mode
     flightmode = new_flightmode;
     control_mode_reason = reason;
-    logger.Write_Mode((uint8_t)flightmode->mode_number(), reason);
-    gcs().send_message(MSG_HEARTBEAT);
+    // logger.Write_Mode((uint8_t)flightmode->mode_number(), reason);
+    // gcs().send_message(MSG_HEARTBEAT);
 
-#if HAL_ADSB_ENABLED
-    adsb.set_is_auto_mode((mode == Mode::Number::AUTO) || (mode == Mode::Number::RTL) || (mode == Mode::Number::GUIDED));
-#endif
+// #if HAL_ADSB_ENABLED
+//     adsb.set_is_auto_mode((mode == Mode::Number::AUTO) || (mode == Mode::Number::RTL) || (mode == Mode::Number::GUIDED));
+// #endif
 
-#if AP_FENCE_ENABLED
-    // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
-    // this flight mode change could be automatic (i.e. fence, battery, GPS or GCS failsafe)
-    // but it should be harmless to disable the fence temporarily in these situations as well
-    fence.manual_recovery_start();
-#endif
+// #if AP_FENCE_ENABLED
+//     // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
+//     // this flight mode change could be automatic (i.e. fence, battery, GPS or GCS failsafe)
+//     // but it should be harmless to disable the fence temporarily in these situations as well
+//     fence.manual_recovery_start();
+// #endif
 
-#if AP_CAMERA_ENABLED
-    camera.set_is_auto_mode(flightmode->mode_number() == Mode::Number::AUTO);
-#endif
+// #if AP_CAMERA_ENABLED
+//     camera.set_is_auto_mode(flightmode->mode_number() == Mode::Number::AUTO);
+// #endif
 
-    // set rate shaping time constants
-#if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
-    attitude_control->set_roll_pitch_rate_tc(g2.command_model_acro_rp.get_rate_tc());
-#endif
-    attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
-#if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
-    if (mode== Mode::Number::ACRO || mode== Mode::Number::DRIFT) {
-        attitude_control->set_yaw_rate_tc(g2.command_model_acro_y.get_rate_tc());
-    }
-#endif
+//     // set rate shaping time constants
+// #if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
+//     attitude_control->set_roll_pitch_rate_tc(g2.command_model_acro_rp.get_rate_tc());
+// #endif
+//     attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
+// #if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
+//     if (mode== Mode::Number::ACRO || mode== Mode::Number::DRIFT) {
+//         attitude_control->set_yaw_rate_tc(g2.command_model_acro_y.get_rate_tc());
+//     }
+// #endif
 
     // update notify object
     notify_flight_mode();
@@ -400,6 +406,166 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     // return success
     return true;
 }
+
+
+
+
+// // set_mode - change flight mode and perform any necessary initialisation
+// // optional force parameter used to force the flight mode change (used only first time mode is set)
+// // returns true if mode was successfully set
+// // ACRO, STABILIZE, ALTHOLD, LAND, DRIFT and SPORT can always be set successfully but the return state of other flight modes should be checked and the caller should deal with failures appropriately
+// bool Copter::set_mode(Mode::Number mode, ModeReason reason)
+// {
+//     // update last reason
+//     const ModeReason last_reason = _last_reason;
+//     _last_reason = reason;
+
+//     // return immediately if we are already in the desired mode
+//     if (mode == flightmode->mode_number()) {
+//         control_mode_reason = reason;
+//         // set yaw rate time constant during autopilot startup
+//         if (reason == ModeReason::INITIALISED && mode == Mode::Number::STABILIZE) {
+//             attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
+//         }
+//         // make happy noise
+//         if (copter.ap.initialised && (reason != last_reason)) {
+//             AP_Notify::events.user_mode_change = 1;
+//         }
+//         return true;
+//     }
+
+//     // Check if GCS mode change is disabled via parameter
+//     if ((reason == ModeReason::GCS_COMMAND) && !gcs_mode_enabled(mode)) {
+//         return false;
+//     }
+
+// #if MODE_AUTO_ENABLED == ENABLED
+//     if (mode == Mode::Number::AUTO_RTL) {
+//         // Special case for AUTO RTL, not a true mode, just AUTO in disguise
+//         return mode_auto.jump_to_landing_sequence_auto_RTL(reason);
+//     }
+// #endif
+
+//     Mode *new_flightmode = mode_from_mode_num(mode);
+//     if (new_flightmode == nullptr) {
+//         notify_no_such_mode((uint8_t)mode);
+//         return false;
+//     }
+
+//     bool ignore_checks = !motors->armed();   // allow switching to any mode if disarmed.  We rely on the arming check to perform
+
+// #if FRAME_CONFIG == HELI_FRAME
+//     // do not allow helis to enter a non-manual throttle mode if the
+//     // rotor runup is not complete
+//     if (!ignore_checks && !new_flightmode->has_manual_throttle() &&
+//         (motors->get_spool_state() == AP_Motors::SpoolState::SPOOLING_UP || motors->get_spool_state() == AP_Motors::SpoolState::SPOOLING_DOWN)) {
+//         #if MODE_AUTOROTATE_ENABLED == ENABLED
+//             //if the mode being exited is the autorotation mode allow mode change despite rotor not being at
+//             //full speed.  This will reduce altitude loss on bail-outs back to non-manual throttle modes
+//             bool in_autorotation_check = (flightmode != &mode_autorotate || new_flightmode != &mode_autorotate);
+//         #else
+//             bool in_autorotation_check = false;
+//         #endif
+
+//         if (!in_autorotation_check) {
+//             mode_change_failed(new_flightmode, "runup not complete");
+//             return false;
+//         }
+//     }
+// #endif
+
+// #if FRAME_CONFIG != HELI_FRAME
+//     // ensure vehicle doesn't leap off the ground if a user switches
+//     // into a manual throttle mode from a non-manual-throttle mode
+//     // (e.g. user arms in guided, raises throttle to 1300 (not enough to
+//     // trigger auto takeoff), then switches into manual):
+//     bool user_throttle = new_flightmode->has_manual_throttle();
+// #if MODE_DRIFT_ENABLED == ENABLED
+//     if (new_flightmode == &mode_drift) {
+//         user_throttle = true;
+//     }
+// #endif
+//     if (!ignore_checks &&
+//         ap.land_complete &&
+//         user_throttle &&
+//         !copter.flightmode->has_manual_throttle() &&
+//         new_flightmode->get_pilot_desired_throttle() > copter.get_non_takeoff_throttle()) {
+//         mode_change_failed(new_flightmode, "throttle too high");
+//         return false;
+//     }
+// #endif
+
+//     if (!ignore_checks &&
+//         new_flightmode->requires_GPS() &&
+//         !copter.position_ok()) {
+//         mode_change_failed(new_flightmode, "requires position");
+//         return false;
+//     }
+
+//     // check for valid altitude if old mode did not require it but new one does
+//     // we only want to stop changing modes if it could make things worse
+//     if (!ignore_checks &&
+//         !copter.ekf_alt_ok() &&
+//         flightmode->has_manual_throttle() &&
+//         !new_flightmode->has_manual_throttle()) {
+//         mode_change_failed(new_flightmode, "need alt estimate");
+//         return false;
+//     }
+
+//     if (!new_flightmode->init(ignore_checks)) {
+//         mode_change_failed(new_flightmode, "init failed");
+//         return false;
+//     }
+
+//     // perform any cleanup required by previous flight mode
+//     exit_mode(flightmode, new_flightmode);
+
+//     // store previous flight mode (only used by tradeheli's autorotation)
+//     prev_control_mode = flightmode->mode_number();
+
+//     // update flight mode
+//     flightmode = new_flightmode;
+//     control_mode_reason = reason;
+//     logger.Write_Mode((uint8_t)flightmode->mode_number(), reason);
+//     gcs().send_message(MSG_HEARTBEAT);
+
+// #if HAL_ADSB_ENABLED
+//     adsb.set_is_auto_mode((mode == Mode::Number::AUTO) || (mode == Mode::Number::RTL) || (mode == Mode::Number::GUIDED));
+// #endif
+
+// #if AP_FENCE_ENABLED
+//     // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
+//     // this flight mode change could be automatic (i.e. fence, battery, GPS or GCS failsafe)
+//     // but it should be harmless to disable the fence temporarily in these situations as well
+//     fence.manual_recovery_start();
+// #endif
+
+// #if AP_CAMERA_ENABLED
+//     camera.set_is_auto_mode(flightmode->mode_number() == Mode::Number::AUTO);
+// #endif
+
+//     // set rate shaping time constants
+// #if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
+//     attitude_control->set_roll_pitch_rate_tc(g2.command_model_acro_rp.get_rate_tc());
+// #endif
+//     attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
+// #if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
+//     if (mode== Mode::Number::ACRO || mode== Mode::Number::DRIFT) {
+//         attitude_control->set_yaw_rate_tc(g2.command_model_acro_y.get_rate_tc());
+//     }
+// #endif
+
+//     // update notify object
+//     notify_flight_mode();
+
+//     // make happy noise
+//     if (copter.ap.initialised) {
+//         AP_Notify::events.user_mode_change = 1;
+//     }
+
+//     // return success
+//     return true;
+// }
 
 bool Copter::set_mode(const uint8_t new_mode, const ModeReason reason)
 {
@@ -670,7 +836,7 @@ void Mode::land_run_vertical_control(bool pause_descent)
                 // doing precland but too far away from the obstacle
                 // do not descend
                 cmb_rate = 0.0f;
-            } else if (target_pos_meas.z > 35.0f && target_pos_meas.z < 200.0f && !copter.precland.do_fast_descend()) {
+            } else if (target_pos_meas.z > 35.0f && target_pos_meas.z < 200.0f) {
                 // very close to the ground and doing prec land, lets slow down to make sure we land on target
                 // compute desired descent velocity
                 const float precland_acceptable_error_cm = 15.0f;
@@ -785,7 +951,7 @@ void Mode::land_run_horizontal_control()
     }
 
     // call attitude controller
-    attitude_control->input_thrust_vector_heading(thrust_vector, auto_yaw.get_heading());
+    // attitude_control->input_thrust_vector_heading(thrust_vector, auto_yaw.get_heading());   // AKGL commented to remove error
 
 }
 
@@ -851,7 +1017,7 @@ void Mode::precland_retry_position(const Vector3f &retry_pos)
     pos_control->update_z_controller();
 
     // call attitude controller
-    attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
+    // attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading()); // AKGL commented to remove errors
 
 }
 

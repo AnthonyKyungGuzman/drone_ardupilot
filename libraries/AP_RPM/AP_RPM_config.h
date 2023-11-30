@@ -8,7 +8,7 @@
 #include <AP_ESC_Telem/AP_ESC_Telem_config.h>
 
 #ifndef AP_RPM_ENABLED
-#define AP_RPM_ENABLED 1
+#define AP_RPM_ENABLED 0 // 1 AKGL
 #endif
 
 #ifndef RPM_MAX_INSTANCES

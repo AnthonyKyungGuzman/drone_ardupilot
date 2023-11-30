@@ -343,6 +343,7 @@ struct PACKED log_Guided_Position_Target {
     float accel_target_z;
 };
 
+
 // guided attitude target logging
 struct PACKED log_Guided_Attitude_Target {
     LOG_PACKET_HEADER;
@@ -381,6 +382,8 @@ void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, c
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
+
+
 
 // Write a Guided mode attitude target
 // roll, pitch and yaw are in radians

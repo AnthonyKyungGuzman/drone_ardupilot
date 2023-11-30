@@ -1071,7 +1071,6 @@ void RCOutput::set_group_mode(pwm_group &group)
 #if HAL_SERIALLED_ENABLED
     {
         uint8_t bits_per_pixel = 24;
-        uint32_t bit_width = NEOP_BIT_WIDTH_TICKS;
         bool active_high = true;
 
         if (!start_led_thread()) {
@@ -1081,7 +1080,6 @@ void RCOutput::set_group_mode(pwm_group &group)
 
         if (group.current_mode == MODE_PROFILED) {
             bits_per_pixel = 25;
-            bit_width = PROFI_BIT_WIDTH_TICKS;
             active_high = false;
         }
 
@@ -1096,7 +1094,7 @@ void RCOutput::set_group_mode(pwm_group &group)
         // calculate min time between pulses taking into account the DMAR parallelism
         const uint32_t pulse_time_us = 1000000UL * bit_length / rate;
 
-        if (!setup_group_DMA(group, rate, bit_width, active_high, buffer_length, pulse_time_us, false)) {
+        if (!setup_group_DMA(group, rate, NEOP_BIT_WIDTH_TICKS, active_high, buffer_length, pulse_time_us, false)) {
             group.current_mode = MODE_PWM_NONE;
             break;
         }
@@ -1700,8 +1698,7 @@ bool RCOutput::serial_led_send(pwm_group &group)
     }
 
 #if HAL_DSHOT_ENABLED
-    if (soft_serial_waiting() || (group.dshot_state != DshotState::IDLE && group.dshot_state != DshotState::RECV_COMPLETE)
-        || AP_HAL::micros64() - group.last_dmar_send_us < (group.dshot_pulse_time_us + 50)) {
+    if (soft_serial_waiting() || (group.dshot_state != DshotState::IDLE && group.dshot_state != DshotState::RECV_COMPLETE)) {
         // doing serial output or DMAR input, don't send DShot pulses
         return false;
     }
@@ -2506,29 +2503,29 @@ void RCOutput::_set_profiled_clock(pwm_group *grp, uint8_t idx, uint8_t led)
   setup serial LED output data for a given output channel
   and a LED number. LED -1 is all LEDs
 */
-bool RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue)
+void RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue)
 {
     if (!_initialised) {
-        return false;
+        return;
     }
 
     uint8_t i = 0;
     pwm_group *grp = find_chan(chan, i);
 
     if (!grp) {
-        return false;
+        return;
     }
 
     if (grp->serial_led_pending) {
         // dont allow setting new data if a send is pending
         // would result in a fight over the mutex
-        return false;
-    }
+        return;
+    };
 
     WITH_SEMAPHORE(grp->serial_led_mutex);
 
     if (grp->serial_nleds == 0 || led >= grp->serial_nleds) {
-        return false;
+        return;
     }
 
     if ((grp->current_mode != grp->led_mode) && is_led_protocol(grp->led_mode)) {
@@ -2545,7 +2542,7 @@ bool RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t 
                 }
                 grp->led_mode = MODE_PWM_NONE;
                 grp->serial_nleds = 0;
-                return false;
+                return;
             }
         }
 
@@ -2556,11 +2553,11 @@ bool RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t 
             // Failed to set output mode
             grp->led_mode = MODE_PWM_NONE;
             grp->serial_nleds = 0;
-            return false;
+            return;
         }
 
     } else if (!is_led_protocol(grp->current_mode)) {
-        return false;
+        return;
     }
 
     if (led == -1) {
@@ -2568,7 +2565,7 @@ bool RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t 
         for (uint8_t n=0; n<grp->serial_nleds; n++) {
             serial_led_set_single_rgb_data(*grp, i, n, red, green, blue);
         }
-        return true;
+        return;
     }
 
     // if not ouput clock and trailing frames, run through all LED's to do it now
@@ -2579,8 +2576,6 @@ bool RCOutput::set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t 
         }
     }
     serial_led_set_single_rgb_data(*grp, i, uint8_t(led), red, green, blue);
-
-    return true;
 }
 
 /*
@@ -2605,35 +2600,33 @@ void RCOutput::serial_led_set_single_rgb_data(pwm_group& group, uint8_t idx, uin
 /*
   trigger send of serial led data for one group
 */
-bool RCOutput::serial_led_send(const uint16_t chan)
+void RCOutput::serial_led_send(const uint16_t chan)
 {
     if (!_initialised) {
-        return false;
+        return;
     }
 
     if (led_thread_ctx == nullptr) {
-        return false;
+        return;
     }
 
     uint8_t i;
     pwm_group *grp = find_chan(chan, i);
     if (!grp) {
-        return false;
+        return;
     }
 
     WITH_SEMAPHORE(grp->serial_led_mutex);
 
     if (grp->serial_nleds == 0 || !is_led_protocol(grp->current_mode)) {
-        return false;
+        return;
     }
 
     if (grp->prepared_send) {
+        chEvtSignal(led_thread_ctx, EVT_LED_SEND);
         grp->serial_led_pending = true;
         serial_led_pending = true;
-        chEvtSignal(led_thread_ctx, EVT_LED_SEND);
     }
-
-    return true;
 }
 #endif // HAL_SERIALLED_ENABLED
 

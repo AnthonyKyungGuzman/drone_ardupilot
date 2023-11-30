@@ -155,7 +155,7 @@ HAL_ChibiOS::HAL_ChibiOS() :
 #endif
         &analogIn,
         &storageDriver,
-        &uartADriver,
+        &uartJDriver, //&uartADriver, //AKGL
         &gpioDriver,
         &rcinDriver,
         &rcoutDriver,
@@ -344,13 +344,8 @@ void HAL_ChibiOS::run(int argc, char * const argv[], Callbacks* callbacks) const
     main_loop();
 }
 
-static HAL_ChibiOS hal_chibios;
-
 const AP_HAL::HAL& AP_HAL::get_HAL() {
-    return hal_chibios;
-}
-
-AP_HAL::HAL& AP_HAL::get_HAL_mutable() {
+    static const HAL_ChibiOS hal_chibios;
     return hal_chibios;
 }
 

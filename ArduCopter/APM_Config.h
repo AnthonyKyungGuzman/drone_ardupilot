@@ -1,33 +1,33 @@
 // User specific config file.  Any items listed in config.h can be overridden here.
 
 // uncomment the lines below to disable features (flash sizes listed are for APM2 boards and will underestimate savings on Pixhawk and other boards)
-//#define LOGGING_ENABLED       DISABLED            // disable logging to save 11K of flash space
-//#define MOUNT                 DISABLED            // disable the camera gimbal to save 8K of flash space
-//#define AUTOTUNE_ENABLED      DISABLED            // disable the auto tune functionality to save 7k of flash
-//#define RANGEFINDER_ENABLED   DISABLED            // disable rangefinder to save 1k of flash
-//#define AC_AVOID_ENABLED      DISABLED            // disable stop-at-fence library
-//#define AC_OAPATHPLANNER_ENABLED DISABLED         // disable path planning around obstacles
-//#define PARACHUTE             DISABLED            // disable parachute release to save 1k of flash
-//#define NAV_GUIDED            DISABLED            // disable external navigation computer ability to control vehicle through MAV_CMD_NAV_GUIDED mission commands
-//#define STATS_ENABLED         DISABLED            // disable statistics support
-//#define MODE_ACRO_ENABLED     DISABLED            // disable acrobatic mode support
-//#define MODE_AUTO_ENABLED     DISABLED            // disable auto mode support
-//#define MODE_BRAKE_ENABLED    DISABLED            // disable brake mode support
-//#define MODE_CIRCLE_ENABLED   DISABLED            // disable circle mode support
-//#define MODE_DRIFT_ENABLED    DISABLED            // disable drift mode support
-//#define MODE_FLIP_ENABLED     DISABLED            // disable flip mode support
-//#define MODE_FOLLOW_ENABLED   DISABLED            // disable follow mode support
-//#define MODE_GUIDED_ENABLED   DISABLED            // disable guided mode support
-//#define MODE_GUIDED_NOGPS_ENABLED   DISABLED      // disable guided/nogps mode support
-//#define MODE_LOITER_ENABLED   DISABLED            // disable loiter mode support
-//#define MODE_POSHOLD_ENABLED  DISABLED            // disable poshold mode support
-//#define MODE_RTL_ENABLED      DISABLED            // disable rtl mode support
-//#define MODE_SMARTRTL_ENABLED DISABLED            // disable smartrtl mode support
-//#define MODE_SPORT_ENABLED    DISABLED            // disable sport mode support
-//#define MODE_SYSTEMID_ENABLED DISABLED            // disable system ID mode support
-//#define MODE_THROW_ENABLED    DISABLED            // disable throw mode support
-//#define MODE_ZIGZAG_ENABLED   DISABLED            // disable zigzag mode support
-//#define OSD_ENABLED           DISABLED            // disable on-screen-display support
+#define LOGGING_ENABLED       DISABLED            // disable logging to save 11K of flash space
+// #define MOUNT                 DISABLED            // disable the camera gimbal to save 8K of flash space
+#define AUTOTUNE_ENABLED      DISABLED            // disable the auto tune functionality to save 7k of flash
+#define RANGEFINDER_ENABLED   DISABLED            // disable rangefinder to save 1k of flash
+#define AC_AVOID_ENABLED      DISABLED            // disable stop-at-fence library
+#define AC_OAPATHPLANNER_ENABLED DISABLED         // disable path planning around obstacles
+#define PARACHUTE             DISABLED            // disable parachute release to save 1k of flash
+#define NAV_GUIDED            DISABLED            // disable external navigation computer ability to control vehicle through MAV_CMD_NAV_GUIDED mission commands
+#define STATS_ENABLED         DISABLED            // disable statistics support
+#define MODE_ACRO_ENABLED     DISABLED            // disable acrobatic mode support
+#define MODE_AUTO_ENABLED     DISABLED            // disable auto mode support
+#define MODE_BRAKE_ENABLED    DISABLED            // disable brake mode support
+#define MODE_CIRCLE_ENABLED   DISABLED            // disable circle mode support
+#define MODE_DRIFT_ENABLED    DISABLED            // disable drift mode support
+#define MODE_FLIP_ENABLED     DISABLED            // disable flip mode support
+#define MODE_FOLLOW_ENABLED   DISABLED            // disable follow mode support
+// #define MODE_GUIDED_ENABLED   DISABLED            // disable guided mode support
+#define MODE_GUIDED_NOGPS_ENABLED   DISABLED      // disable guided/nogps mode support
+#define MODE_LOITER_ENABLED   DISABLED            // disable loiter mode support
+#define MODE_POSHOLD_ENABLED  DISABLED            // disable poshold mode support
+#define MODE_RTL_ENABLED      DISABLED            // disable rtl mode support
+#define MODE_SMARTRTL_ENABLED DISABLED            // disable smartrtl mode support
+#define MODE_SPORT_ENABLED    DISABLED            // disable sport mode support
+#define MODE_SYSTEMID_ENABLED DISABLED            // disable system ID mode support
+#define MODE_THROW_ENABLED    DISABLED            // disable throw mode support
+#define MODE_ZIGZAG_ENABLED   DISABLED            // disable zigzag mode support
+// #define OSD_ENABLED           DISABLED            // disable on-screen-display support
 
 // features below are disabled by default on all boards
 //#define CAL_ALWAYS_REBOOT                         // flight controller will reboot after compass or accelerometer calibration completes
@@ -49,3 +49,50 @@
 //#define USERHOOK_SUPERSLOWLOOP userhook_SuperSlowLoop();  // for code to be run at 1hz
 //#define USERHOOK_AUXSWITCH ENABLED                        // for code to handle user aux switches
 //#define USER_PARAMS_ENABLED ENABLED                       // to enable user parameters
+
+// The following variables are disabled because we dont use them AKGL
+// AP_EXTERNAL_CONTROL_ENABLED 
+// AP_GRIPPER_ENABLED
+// AP_WINCH_ENABLED
+// AP_RELAY_ENABLED
+// AP_SCRIPTING_ENABLED
+// HAL_PROXIMITY_ENABLED
+// AP_OPTICALFLOW_ENABLED
+// HAL_MOUNT_ENABLED. - camera mount
+// AP_CAMERA_ENABLED
+// AC_PRECLAND_ENABLED
+// AP_AIRSPEED_ENABLED
+// AP_VIDEOTX_ENABLED
+// AP_SMARTAUDIO_ENABLED
+// AP_TRAMP_ENABLED
+// HAL_GYROFFT_ENABLED   changed to enabled
+// HAL_RUNCAM_ENABLED
+// HAL_HOTT_TELEM_ENABLED
+// HAL_GENERATOR_ENABLED changed to enabled 
+// HAL_EFI_ENABLED
+// AP_FENCE_ENABLED
+// HAL_NMEA_OUTPUT_ENABLED
+// AP_AIS_ENABLED
+// AP_TEMPERATURE_SENSOR_ENABLED
+// HAL_VISUALODOM_ENABLED
+// AP_BEACON_ENABLED
+// AP_RPM_ENABLED
+// AP_COMPASS_ENABLE_DEFAULT
+// HAL_EXTERNAL_AHRS_ENABLED
+
+
+
+// //Output without removing flags
+// BUILD SUMMARY
+// Build directory: /home/anthony/projects/sandbox/intel/drone_ardupilot/build/CubeOrangePlus
+// Target          Text (B)  Data (B)  BSS (B)  Total Flash Used (B)  Free Flash (B)  External Flash Used (B)
+// ----------------------------------------------------------------------------------------------------------
+// bin/arducopter   1651440      3600   258680               1655040          311036  Not Applicable     
+
+
+//Output removing Flags
+// BUILD SUMMARY
+// Build directory: /home/anthony/projects/sandbox/intel/drone_ardupilot/build/CubeOrangePlus
+// Target          Text (B)  Data (B)  BSS (B)  Total Flash Used (B)  Free Flash (B)  External Flash Used (B)
+// ----------------------------------------------------------------------------------------------------------
+// bin/arducopter   1281612      2912   259356               1284524          681548  Not Applicable    
