@@ -176,6 +176,7 @@ void Copter::motors_output()
         motor_test_output();
     } else {
         // send output signals to motors
+        
         flightmode->output_to_motors();
     }
 

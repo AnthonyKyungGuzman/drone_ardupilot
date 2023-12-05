@@ -4,7 +4,7 @@
 #include <AP_OSD/AP_OSD.h>
 
 #ifndef AP_VIDEOTX_ENABLED
-#define AP_VIDEOTX_ENABLED 1
+#define AP_VIDEOTX_ENABLED  0 //1 //AKGL
 #endif
 
 #ifndef AP_TRAMP_ENABLED

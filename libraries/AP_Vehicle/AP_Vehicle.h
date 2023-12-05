@@ -274,6 +274,7 @@ protected:
     virtual void load_parameters() = 0;
     virtual void set_control_channels() {}
 
+
     // board specific config
     AP_BoardConfig BoardConfig;
 

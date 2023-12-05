@@ -272,6 +272,7 @@ void AP_Vehicle::setup()
                         AP::fwversion().fw_string,
                         (unsigned)hal.util->available_memory());
 
+
 #if AP_CHECK_FIRMWARE_ENABLED
     check_firmware_print();
 #endif
@@ -447,10 +448,18 @@ void AP_Vehicle::setup()
 #endif
 }
 
+
 void AP_Vehicle::loop()
 {
     scheduler.loop();
     G_Dt = scheduler.get_loop_period_s();
+
+    static int i = 0;
+
+    if (i %1000 ==0)
+        DEV_PRINTF("En loop y viendo que pedo");
+
+    i++;
 
     if (!done_safety_init) {
         /*

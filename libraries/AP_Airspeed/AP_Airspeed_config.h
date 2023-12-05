@@ -5,7 +5,7 @@
 #include <AP_MSP/AP_MSP_config.h>
 
 #ifndef AP_AIRSPEED_ENABLED
-#define AP_AIRSPEED_ENABLED 1
+#define AP_AIRSPEED_ENABLED 0 //1 //AKGL
 #endif
 
 #ifndef AP_AIRSPEED_BACKEND_DEFAULT_ENABLED

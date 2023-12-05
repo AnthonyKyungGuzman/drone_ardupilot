@@ -6,6 +6,6 @@
 #if BOARD_FLASH_SIZE <= 1024
     #define AP_AIS_ENABLED 0
 #else
-    #define AP_AIS_ENABLED 2
+    #define AP_AIS_ENABLED 0 //2 //AKGL
 #endif
 #endif

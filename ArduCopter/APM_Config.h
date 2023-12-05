@@ -5,8 +5,8 @@
 //#define MOUNT                 DISABLED            // disable the camera gimbal to save 8K of flash space
 //#define AUTOTUNE_ENABLED      DISABLED            // disable the auto tune functionality to save 7k of flash
 //#define RANGEFINDER_ENABLED   DISABLED            // disable rangefinder to save 1k of flash
-//#define AC_AVOID_ENABLED      DISABLED            // disable stop-at-fence library
-//#define AC_OAPATHPLANNER_ENABLED DISABLED         // disable path planning around obstacles
+#define AC_AVOID_ENABLED      DISABLED            // disable stop-at-fence library
+#define AC_OAPATHPLANNER_ENABLED DISABLED         // disable path planning around obstacles
 //#define PARACHUTE             DISABLED            // disable parachute release to save 1k of flash
 //#define NAV_GUIDED            DISABLED            // disable external navigation computer ability to control vehicle through MAV_CMD_NAV_GUIDED mission commands
 //#define STATS_ENABLED         DISABLED            // disable statistics support
@@ -16,7 +16,7 @@
 //#define MODE_CIRCLE_ENABLED   DISABLED            // disable circle mode support
 //#define MODE_DRIFT_ENABLED    DISABLED            // disable drift mode support
 //#define MODE_FLIP_ENABLED     DISABLED            // disable flip mode support
-//#define MODE_FOLLOW_ENABLED   DISABLED            // disable follow mode support
+#define MODE_FOLLOW_ENABLED   DISABLED            // disable follow mode support
 //#define MODE_GUIDED_ENABLED   DISABLED            // disable guided mode support
 //#define MODE_GUIDED_NOGPS_ENABLED   DISABLED      // disable guided/nogps mode support
 //#define MODE_LOITER_ENABLED   DISABLED            // disable loiter mode support
@@ -49,3 +49,40 @@
 //#define USERHOOK_SUPERSLOWLOOP userhook_SuperSlowLoop();  // for code to be run at 1hz
 //#define USERHOOK_AUXSWITCH ENABLED                        // for code to handle user aux switches
 //#define USER_PARAMS_ENABLED ENABLED                       // to enable user parameters
+
+// Removed libraries that we are not going to use and but kept the ones that make the code work AKGl
+// HAL_EXTERNAL_AHRS_ENABLED
+// AP_AIRSPEED_ENABLED
+// HAL_RUNCAM_ENABLED 
+// HAL_HOTT_TELEM_ENABLED
+// HAL_VISUALODOM_ENABLED
+// AP_VIDEOTX_ENABLED
+// AP_SMARTAUDIO_ENABLED
+// AP_TRAMP_ENABLED
+// AP_OPENDRONEID_ENABLED - check in hwdef.dat
+// HAL_EFI_ENABLED
+// AP_TEMPERATURE_SENSOR_ENABLED
+// AP_KDECAN_ENABLED
+// AP_AIS_ENABLED
+// HAL_NMEA_OUTPUT_ENABLED
+// AP_FENCE_ENABLED
+// AP_FILTER_ENABLED
+// AP_DDS_ENABLED
+// AP_GRIPPER_ENABLED
+// AP_WINCH_ENABLED
+
+
+
+// Not set by us or by developers
+// AP_NETWORKING_ENABLED
+
+
+// Needed to run correctly
+// HAL_GCS_ENABLED
+// HAL_MSP_ENABLED
+// HAL_GENERATOR_ENABLED
+// HAL_GYROFFT_ENABLED
+// OSD_ENABLED
+
+
+// AP_RELAY_ENABLED not needed but can be useful for debugging GPIO's

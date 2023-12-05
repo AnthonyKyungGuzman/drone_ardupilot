@@ -24,7 +24,7 @@
 #include <AP_HAL/AP_HAL_Boards.h>
 
 #ifndef HAL_RUNCAM_ENABLED
-#define HAL_RUNCAM_ENABLED 1
+#define HAL_RUNCAM_ENABLED 0 //1 //AKGL
 #endif
 
 #if HAL_RUNCAM_ENABLED
