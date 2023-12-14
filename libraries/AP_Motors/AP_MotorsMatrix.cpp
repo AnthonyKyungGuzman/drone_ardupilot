@@ -180,7 +180,7 @@ void AP_MotorsMatrix::output_to_motors()
             if (i == 0)
             {
                 static int b = 0;
-                if(b >= 10000)
+                if(b >= 3000)
                 {
                     _actuator[0] = 1500;
                 }
