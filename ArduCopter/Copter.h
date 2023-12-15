@@ -1059,3 +1059,6 @@ extern Copter copter;
 
 using AP_HAL::millis;
 using AP_HAL::micros;
+
+
+//TODO: play with config.h params and with apm_config.h params

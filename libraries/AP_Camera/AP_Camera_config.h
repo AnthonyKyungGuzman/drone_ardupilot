@@ -6,7 +6,7 @@
 #include <GCS_MAVLink/GCS_config.h>
 
 #ifndef AP_CAMERA_ENABLED
-#define AP_CAMERA_ENABLED 1
+#define AP_CAMERA_ENABLED 0 //1 AKGL
 #endif
 
 #ifndef AP_CAMERA_SEND_FOV_STATUS_ENABLED

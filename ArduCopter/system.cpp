@@ -169,7 +169,7 @@ void Copter::init_ardupilot()
     g2.beacon.init();
 #endif
 
-#if AP_RPM_ENABLED
+#if AP_RPM_ENABLED //Not sure what really does AKGL
     // initialise AP_RPM library
     rpm_sensor.init();
 #endif
